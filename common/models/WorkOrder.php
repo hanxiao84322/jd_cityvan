@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\Utility;
 use Yii;
+
 /**
  * This is the model class for table "work_order".
  *
@@ -42,22 +43,21 @@ use Yii;
  * @property string|null $update_username 更新人用户名
  * @property string|null $finished_time 完成时间
  */
-
 class WorkOrder extends \yii\db\ActiveRecord
 {
 
-    public string $logistic_company;
-    public  $work_order_type_name;
+    public $logistic_company;
+    public $work_order_type_name;
     public $assign_name;
 
-    public string $logistic_company_name;
+    public $logistic_company_name;
 
-    public array $files = [];
+    public $files = [];
 
     const TYPE_HURRY_DELIVERY = 1;
     const TYPE_RETURN = 2;
 
-    public static array $typeList = [
+    public static $typeList = [
         self::TYPE_HURRY_DELIVERY => '催快递',
         self::TYPE_RETURN => '退货',
     ];
@@ -68,7 +68,7 @@ class WorkOrder extends \yii\db\ActiveRecord
     const STATUS_FINISHED = 4;
     const STATUS_PENDING = 5;
 
-    public static array $statusList = [
+    public static $statusList = [
         self::STATUS_WAIT_ALLOCATION => '新增',
         self::STATUS_WAIT_DEAL => '指派处理中',
         self::STATUS_DEALT => '答复完成',
@@ -80,7 +80,7 @@ class WorkOrder extends \yii\db\ActiveRecord
     const PRIORITY_MIDDLE = 2;
     const PRIORITY_HIGH = 3;
 
-    public static array $priorityList = [
+    public static $priorityList = [
         self::PRIORITY_LOW => '低',
         self::PRIORITY_MIDDLE => '中',
         self::PRIORITY_HIGH => '高',
@@ -89,20 +89,18 @@ class WorkOrder extends \yii\db\ActiveRecord
     const CREATE_YES = 1;
     const CREATE_NO = 0;
 
-    public static array $createList = [
+    public static $createList = [
         self::CREATE_YES => '是',
         self::CREATE_NO => '否',
     ];
 
-    public int $total_num;
-public $username;
-public $name;
-public $not_finished_num;
-public $system_create_num;
-public $ordinary_create_num;
-public $jd_create_num;
-
-
+    public $total_num;
+    public $username;
+    public $name;
+    public $not_finished_num;
+    public $system_create_num;
+    public $ordinary_create_num;
+    public $jd_create_num;
 
 
     /**
@@ -119,11 +117,12 @@ public $jd_create_num;
     public function rules()
     {
         return [
-            [['work_order_no', 'logistic_no', 'order_no',  'logistic_id', 'create_time', 'type'], 'required'],
+            [['work_order_no', 'logistic_no', 'order_no', 'logistic_id', 'create_time', 'type'], 'required'],
+            ['work_order_no', 'unique', 'targetClass' => '\common\models\WorkOrder', 'message' => '工单好已存在.'],
             [['logistic_id', 'type', 'priority', 'order_create_num', 'customer_attention_level', 'system_create', 'ordinary_create', 'jd_create', 'status'], 'integer'],
             [['penalty_amount'], 'number'],
-            [['create_time', 'update_time', 'finished_time','send_time'], 'safe'],
-            [['work_order_no', 'order_no', 'warehouse_code', 'receive_name', 'operate_username', 'assign_username', 'create_username', 'update_username','customer_service_name', 'shipping_no'], 'string', 'max' => 50],
+            [['create_time', 'update_time', 'finished_time', 'send_time'], 'safe'],
+            [['work_order_no', 'order_no', 'warehouse_code', 'receive_name', 'operate_username', 'assign_username', 'create_username', 'update_username', 'customer_service_name', 'shipping_no'], 'string', 'max' => 50],
             [['logistic_no', 'jd_work_order_no'], 'string', 'max' => 20],
             [['receive_phone', 'receive_address'], 'string', 'max' => 255],
             [['description', 'content', 'file_path', 'latest_reply'], 'string', 'max' => 500],
@@ -211,16 +210,16 @@ public $jd_create_num;
 
     public static function getCreateNumByLogisticNo($logisticNo)
     {
-        return self::find()->where(['logistic_no'=>$logisticNo])->count();
+        return self::find()->where(['logistic_no' => $logisticNo])->count();
     }
 
     public static function getCountByUsername($username)
     {
-        return self::find()->where(['receive_name'=>$username])->count();
+        return self::find()->where(['receive_name' => $username])->count();
 
     }
 
-    public static function  batchUpdate($excelData, $username)
+    public static function batchUpdate($excelData, $username)
     {
         $return = [
             'successCount' => 0,
@@ -332,9 +331,9 @@ public $jd_create_num;
                     throw new \Exception(Utility::arrayToString($workOrderReplyModel->getErrors()));
                 }
                 if ($status != '需跟进') {
-                    WorkOrder::updateAll(['finished_time' => $createTime, 'update_time' => $createTime, 'status' => WorkOrder::STATUS_FINISHED, 'update_username' => 'system'],['work_order_no' => $workOrderNo]);
+                    WorkOrder::updateAll(['finished_time' => $createTime, 'update_time' => $createTime, 'status' => WorkOrder::STATUS_FINISHED, 'update_username' => 'system'], ['work_order_no' => $workOrderNo]);
                 } else {
-                    WorkOrder::updateAll([ 'update_time' => $createTime, 'status' => WorkOrder::STATUS_FINISHED, 'update_username' => 'system'],['work_order_no' => $workOrderNo]);
+                    WorkOrder::updateAll(['update_time' => $createTime, 'status' => WorkOrder::STATUS_FINISHED, 'update_username' => 'system'], ['work_order_no' => $workOrderNo]);
                 }
                 if (!empty($receiverName) && !empty($receiverPhone)) {
                     $importantCustomerExists = ImportantCustomer::find()->where(['name' => $receiverName, 'phone' => $receiverPhone])->exists();
