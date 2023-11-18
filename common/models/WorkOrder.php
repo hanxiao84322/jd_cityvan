@@ -118,7 +118,7 @@ class WorkOrder extends \yii\db\ActiveRecord
     {
         return [
             [['work_order_no', 'logistic_no', 'order_no', 'logistic_id', 'create_time', 'type'], 'required'],
-            ['work_order_no', 'unique', 'targetClass' => '\common\models\WorkOrder', 'message' => '工单好已存在.'],
+            ['work_order_no', 'unique', 'targetClass' => '\common\models\WorkOrder', 'message' => '工单号已存在.'],
             [['logistic_id', 'type', 'priority', 'order_create_num', 'customer_attention_level', 'system_create', 'ordinary_create', 'jd_create', 'status'], 'integer'],
             [['penalty_amount'], 'number'],
             [['create_time', 'update_time', 'finished_time', 'send_time'], 'safe'],
