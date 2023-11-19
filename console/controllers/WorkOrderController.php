@@ -129,39 +129,41 @@ class WorkOrderController extends Controller
             exit;
         }
         foreach ($result as $item) {
-            try {
-                if (!empty($item['receive_name']) && !empty($item['receive_phone'])) {
+            if (!empty($item['receive_name']) && !empty($item['receive_phone'])) {
+                try {
                     $typeName = WorkOrderType::getTypeName($item['type']);
+                    $updateUsername = 'system';
+                    $workOrderNum = WorkOrder::getCountByUsername($item['receive_name']);
+                    $level = ImportantCustomer::getLevelByCount($workOrderNum);
                     $importantCustomerExists = ImportantCustomer::find()->where(['name' => $item['receive_name'], 'phone' => $item['receive_phone']])->exists();
                     if (!$importantCustomerExists) {
                         $importantCustomerModel = new ImportantCustomer();
                         $importantCustomerModel->name = $item['receive_name'];
                         $importantCustomerModel->phone = $item['receive_phone'];
                         $importantCustomerModel->address = $item['receive_address'];
-                        $importantCustomerModel->work_order_num = 1;
-                        $importantCustomerModel->level = ImportantCustomer::LEVEL_ZERO;
+                        $importantCustomerModel->work_order_num = $workOrderNum;
+                        $importantCustomerModel->level = $level;
                         $importantCustomerModel->complaint_type = $typeName;
-                        $importantCustomerModel->create_name = 'system';
+                        $importantCustomerModel->create_name = $updateUsername;
                         $importantCustomerModel->create_time = date('Y-m-d H:i:s', time());
                     } else {
-                        $workOrderNmu = WorkOrder::getCountByUsername($item['receive_name']);
                         $importantCustomerModel = ImportantCustomer::findOne(['phone' => $item['receive_phone'], 'name' => $item['receive_name']]);
-                        $importantCustomerModel->work_order_num = $workOrderNmu;
+                        $importantCustomerModel->work_order_num = $workOrderNum;
                         if (!in_array($typeName, explode(',', $importantCustomerModel->complaint_type))) {
                             $importantCustomerModel->complaint_type = $importantCustomerModel->complaint_type . ',' . $typeName;
                         }
-                        $importantCustomerModel->level = ImportantCustomer::getLevelByCount($workOrderNmu);
-                        $importantCustomerModel->update_name = 'system';
+                        $importantCustomerModel->level = $level;
+                        $importantCustomerModel->update_name = $updateUsername;
                         $importantCustomerModel->update_time = date('Y-m-d H:i:s', time());
                     }
                     if (!$importantCustomerModel->save()) {
                         throw new \Exception(Utility::arrayToString($importantCustomerModel->getErrors()));
                     }
+                    echo "name:" . $item['receive_name'] . ", phone:" . $item['receive_phone'] . ",work order num: " . $workOrderNum . ",level:" . $level . ".update success!\r\n";
+                } catch (\Exception $e) {
+                    echo $e->getMessage() . "\r\n";
                 }
-            } catch (\Exception $e) {
-                echo $e->getMessage() . "\r\n";
             }
-            echo "finished";
         }
     }
 }
