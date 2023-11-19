@@ -113,8 +113,8 @@ class WorkOrderController extends Controller
     public function actionUpdateImportantCustomer($start = '', $end = '', $username = '')
     {
         $sql = "SELECT receive_name,receive_phone, receive_address, type FROM " . WorkOrder::tableName() . "  WHERE  1  ";
-        $start = empty($start) ? date('Y-m-d 00:00:00', time()) : $start;
-        $end = empty($end) ? date('Y-m-d 23:59:59', time()) : $end;
+        $start = empty($start) ? date('Y-m-d 00:00:00', strtotime('-1 day')) : $start;
+        $end = empty($end) ? date('Y-m-d 23:59:59', strtotime('-1 day')) : $end;
         $sql .= " AND create_time >= '" . $start . "' ";
         $sql .= " AND create_time <= '" . $end . "' ";
         if (!empty($username)) {
