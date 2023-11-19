@@ -96,13 +96,13 @@ class ImportantCustomer extends \yii\db\ActiveRecord
     {
         if ($workOrderCount < 2) {
             return 0;
-        } elseif (2 < $workOrderCount and $workOrderCount <= 5) {
+        } elseif (2 >= $workOrderCount and $workOrderCount < 5) {
             return 1;
-        } elseif (5 < $workOrderCount and $workOrderCount <= 10) {
+        } elseif (5 >= $workOrderCount and $workOrderCount < 10) {
             return 2;
-        } elseif (10 < $workOrderCount and $workOrderCount <= 20) {
+        } elseif (10 >= $workOrderCount and $workOrderCount < 20) {
             return 3;
-        } elseif (20 < $workOrderCount) {
+        } elseif (20 >= $workOrderCount) {
             return 4;
         }
     }
