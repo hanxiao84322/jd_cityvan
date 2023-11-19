@@ -27,7 +27,7 @@ class ImportantCustomer extends \yii\db\ActiveRecord
     const LEVEL_THREE = 3;
     const LEVEL_FOUR = 4;
 
-    public static array $levelList = [
+    public static $levelList = [
         self::LEVEL_ZERO => '无需关注',
         self::LEVEL_ONE => '关注',
         self::LEVEL_TWO => '重点关注',

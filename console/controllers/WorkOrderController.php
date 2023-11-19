@@ -5,7 +5,9 @@ namespace console\controllers;
 use backend\models\UserBackend;
 use common\components\Utility;
 use common\models\CustomerServiceDailyEfficiency;
+use common\models\ImportantCustomer;
 use common\models\WorkOrder;
+use common\models\WorkOrderType;
 use yii\console\Controller;
 
 class WorkOrderController extends Controller
@@ -93,6 +95,69 @@ class WorkOrderController extends Controller
                     }
                 }
                 echo "日期：" . $currentDay . "用户名：" . $serviceUsername . ",类型：" . UserBackend::getTypeName($item['type']) . "创建成功！\r\n";
+            } catch (\Exception $e) {
+                echo $e->getMessage() . "\r\n";
+            }
+            echo "finished";
+        }
+    }
+
+    /**
+     * ./yii work-order/update-important-customer '2023-10-01 00:00:00' '' ''
+     *
+     * @param string $start
+     * @param string $end
+     * @param string $username
+     * @throws \yii\db\Exception
+     */
+    public function actionUpdateImportantCustomer($start = '', $end = '', $username = '')
+    {
+        $sql = "SELECT receive_name,receive_phone, receive_address, type FROM " . WorkOrder::tableName() . "  WHERE  1  ";
+        $start = empty($start) ? date('Y-m-d 00:00:00', time()) : $start;
+        $end = empty($end) ? date('Y-m-d 23:59:59', time()) : $end;
+        $sql .= " AND create_time >= '" . $start . "' ";
+        $sql .= " AND create_time <= '" . $end . "' ";
+        if (!empty($username)) {
+            $sql .= " AND receive_name = '" . $username . "' ";
+        }
+
+        echo "sql:" . $sql . "\r\n";
+
+        $result = \Yii::$app->db->createCommand($sql)->queryAll();
+        if (empty($result)) {
+            echo "没有要执行的数据";
+            exit;
+        }
+        foreach ($result as $item) {
+            try {
+                if (!empty($item['receive_name']) && !empty($item['receive_phone'])) {
+                    $typeName = WorkOrderType::getTypeName($item['type']);
+                    $importantCustomerExists = ImportantCustomer::find()->where(['name' => $item['receive_name'], 'phone' => $item['receive_phone']])->exists();
+                    if (!$importantCustomerExists) {
+                        $importantCustomerModel = new ImportantCustomer();
+                        $importantCustomerModel->name = $item['receive_name'];
+                        $importantCustomerModel->phone = $item['receive_phone'];
+                        $importantCustomerModel->address = $item['receive_address'];
+                        $importantCustomerModel->work_order_num = 1;
+                        $importantCustomerModel->level = ImportantCustomer::LEVEL_ZERO;
+                        $importantCustomerModel->complaint_type = $typeName;
+                        $importantCustomerModel->create_name = 'system';
+                        $importantCustomerModel->create_time = date('Y-m-d H:i:s', time());
+                    } else {
+                        $workOrderNmu = WorkOrder::getCountByUsername($item['receive_name']);
+                        $importantCustomerModel = ImportantCustomer::findOne(['phone' => $item['receive_phone'], 'name' => $item['receive_name']]);
+                        $importantCustomerModel->work_order_num = $workOrderNmu;
+                        if (!in_array($typeName, explode(',', $importantCustomerModel->complaint_type))) {
+                            $importantCustomerModel->complaint_type = $importantCustomerModel->complaint_type . ',' . $typeName;
+                        }
+                        $importantCustomerModel->level = ImportantCustomer::getLevelByCount($workOrderNmu);
+                        $importantCustomerModel->update_name = 'system';
+                        $importantCustomerModel->update_time = date('Y-m-d H:i:s', time());
+                    }
+                    if (!$importantCustomerModel->save()) {
+                        throw new \Exception(Utility::arrayToString($importantCustomerModel->getErrors()));
+                    }
+                }
             } catch (\Exception $e) {
                 echo $e->getMessage() . "\r\n";
             }
