@@ -15,138 +15,10 @@ use yii\console\Controller;
 use \common\models\DeliveryOrder;
 use \common\components\ZjsCloud;
 use yii\db\Exception;
+use yii\db\Expression;
 
 class DeliveryInfoController extends Controller
 {
-
-    /**
-     * ./yii delivery-info/update-data
-     * @throws Exception
-     */
-    public function actionUpdateData()
-    {
-        $sql = 'SELECT logistic_no FROM `delivery_order` WHERE  (DATEDIFF(NOW(), `send_time`) > 20) AND (status not in (8,9,10)) ORDER BY `create_time` DESC';
-        $result = \Yii::$app->db->createCommand($sql)->queryAll();
-
-        if (empty($result)) {
-            echo "没有要执行的数据";
-            exit;
-        }
-        echo count($result) . "条数据需要处理\r\n";
-        foreach ($result as $deliveryOrder) {
-            try {
-                $logisticNo = $deliveryOrder['logistic_no'];
-                $deliveryInfoRes = ZjsCloud::getDeliveryInfo($logisticNo);
-                if (!$deliveryInfoRes['success']) {
-                    throw new \Exception("快递单号：" . $logisticNo . "获取物流轨迹失败，原因：" . $deliveryInfoRes['msg']);
-                }
-                $deliveryInfoRes = json_decode($deliveryInfoRes['data'], true);
-                if ($deliveryInfoRes['description'] !== '成功!') {
-                    throw new \Exception("快递单号：" . $logisticNo . "解析物流轨迹失败，原因：" . $deliveryInfoRes['description']);
-                }
-                if (isset($deliveryInfoRes['orders'][0]) && !empty($deliveryInfoRes['orders'][0])) {
-                    $deliveryOrder = $deliveryInfoRes['orders'][0];
-                    if ($logisticNo != $deliveryOrder['mailNo']) {
-                        throw new \Exception("快递单号：" . $logisticNo . "解析物流轨迹失败，原因：快递单号不一致，解析出快递单号为：" . $deliveryOrder['mailNo']);
-                    }
-                    $deliverySteps = $deliveryOrder['steps'];
-                    if (!empty($deliverySteps)) {
-                        foreach ($deliverySteps as $deliveryStep) {
-                            $operationDescribe = $deliveryStep['operationDescribe'];
-                            $operationTime = $deliveryStep['operationTime'];
-                            $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo]);
-                            if (strpos($operationDescribe, '已取件') !== false) {
-                                $status = DeliveryOrder::STATUS_RECEIVE;
-                                $deliveryOrderModel->status = $status;
-                                $deliveryOrderModel->receive_time = $operationTime;
-                            } elseif (strpos($operationDescribe, '离开') !== false || (strpos($operationDescribe, '到达') !== false && (strpos($operationDescribe, '[新疆') === false) && (strpos($operationDescribe, '【新疆') === false) && (strpos($operationDescribe, '[乌鲁木齐') === false) && (strpos($operationDescribe, '【乌鲁木齐') === false))) {
-                                $status = DeliveryOrder::STATUS_TRANSPORTING;
-                                if ($deliveryOrderModel->transporting_time == '' || $deliveryOrderModel->transporting_time == null) {
-                                    $deliveryOrderModel->transporting_time = $operationTime;
-                                    $deliveryOrderModel->status = $status;
-                                }
-                            } elseif ((strpos($operationDescribe, '到达[新疆') !== false) || (strpos($operationDescribe, '到达【新疆') !== false) || (strpos($operationDescribe, '到达[乌鲁木齐') !== false) || (strpos($operationDescribe, '到达【乌鲁木齐') !== false)) {
-                                $status = DeliveryOrder::STATUS_TRANSPORTED;
-                                $deliveryOrderModel->status = $status;
-                                $deliveryOrderModel->transported_time = $operationTime;
-                            } elseif (strpos($operationDescribe, '货物已转发') !== false) {
-                                $status = DeliveryOrder::STATUS_DELIVERING;
-                                $deliveryOrderModel->status = $status;
-                                $deliveryOrderModel->delivering_time = $operationTime;
-                                $pattern = '/\[(.*?)\]/';
-                                preg_match_all($pattern, $operationDescribe, $matches);
-                                if (!empty($matches[1])) {
-                                    if (isset($matches[1][0]) && !empty($matches[1][0])) {
-                                        $secLogisticCompany = $matches[1][0];
-                                        $logisticCompanyModel = LogisticCompany::findOne(['company_name' => $secLogisticCompany]);
-                                        if (!$logisticCompanyModel) {
-                                            $logisticCompanyModel = new LogisticCompany();
-                                            $logisticCompanyModel->company_name = $secLogisticCompany;
-                                            if (!$logisticCompanyModel->save()) {
-                                                throw new Exception("快递单号：" . $logisticNo . "新增快递公司失败，原因：" . Utility::arrayToString($logisticCompanyModel->getErrors()));
-                                            }
-                                            $secLogisticId = $logisticCompanyModel->attributes['id'];
-                                        } else {
-                                            $secLogisticId = $logisticCompanyModel->id;
-                                        }
-                                        $deliveryOrderModel->sec_logistic_id = $secLogisticId;
-
-                                    }
-                                    if (isset($matches[1][1]) && !empty($matches[1][1])) {
-                                        $secLogisticNo = $matches[1][1];
-                                        $deliveryOrderModel->sec_logistic_no = $secLogisticNo;
-                                    }
-                                }
-                            } elseif (strpos($operationDescribe, '签收') !== false) {
-                                $status = DeliveryOrder::STATUS_DELIVERED;
-                                $deliveryOrderModel->status = $status;
-                                $deliveryOrderModel->delivered_time = $operationTime;
-                                $deliveryOrderModel->finish_time = $operationTime;
-                            } elseif (strpos($operationDescribe, '拒收') !== false) {
-                                $status = DeliveryOrder::STATUS_REJECT;
-                                $deliveryOrderModel->status = $status;
-                                $deliveryOrderModel->reject_time = $operationTime;
-                                $deliveryOrderModel->finish_time = $operationTime;
-                            } elseif (strpos($operationDescribe, '丢失') !== false) {
-                                $status = DeliveryOrder::STATUS_LOST;
-                                $deliveryOrderModel->status = $status;
-                                $deliveryOrderModel->lost_time = $operationTime;
-                                $deliveryOrderModel->finish_time = $operationTime;
-                            }
-                            $deliveryOrderModel->latest_track_info = $operationDescribe;
-                            if (!$deliveryOrderModel->save()) {
-                                throw new \Exception("快递单号：" . $logisticNo . "更新运单信息失败，原因：" . Utility::arrayToString($deliveryOrderModel->getErrors()));
-                            }
-                            $deliveryInfoExist = DeliveryInfo::find()->where(['logistic_no' => $logisticNo, 'status' => $status, 'content' => $operationDescribe, 'update_time' => $operationTime])->exists();
-                            if (!$deliveryInfoExist) {
-                                $deliveryInfoModel = new DeliveryInfo();
-                                $deliveryInfoModel->logistic_no = $logisticNo;
-                                $deliveryInfoModel->status = $status;
-                                $deliveryInfoModel->content = $operationDescribe;
-                                $deliveryInfoModel->update_time = $operationTime;
-                                if (!$deliveryInfoModel->save()) {
-                                    throw new \Exception("快递单号：" . $logisticNo . "新增物流信息失败，原因：" . Utility::arrayToString($deliveryInfoModel->getErrors()));
-                                }
-                            }
-                        }
-
-                    } else {
-                        throw new \Exception("快递单号：" . $logisticNo . "解析物流轨迹失败，原因：steps为空");
-                    }
-
-                } else {
-                    throw new \Exception("快递单号：" . $logisticNo . "解析物流轨迹失败，原因：orders-0不存在");
-                }
-                echo "success" . "\r\n";
-            } catch (\Exception $e) {
-                echo $e->getMessage() . "\r\n";
-            }
-
-            sleep(1);
-        }
-        echo "finish" . "\r\n";
-    }
-
     /**
      * ./yii delivery-info/test 'ZJS000361342741'
      */
@@ -246,7 +118,7 @@ class DeliveryInfoController extends Controller
 
     /**
      *
-     * ./yii delivery-info/update 0 '2023-10-16 00:00:00' '2023-10-20 23:59:59' ''
+     * ./yii delivery-info/update 0 '2023-10-16 00:00:00' '2023-10-20 23:59:59' '20231117044'
      * @param int $dryRun
      * @param string $logisticNo
      * @param string $startTime
@@ -255,7 +127,7 @@ class DeliveryInfoController extends Controller
      */
     public function actionUpdate($dryRun = 1, $startTime = '', $endTime = '', $logisticNo = '')
     {
-        $fixSql = "SELECT send_time, logistic_no, logistic_id, status, latest_track_info, create_time FROM `delivery_order` WHERE create_time > '2023-10-01 00:00:00' and  status not in (5,6,7,8) ";
+        $fixSql = "SELECT send_time, logistic_no, logistic_id, status, latest_track_info, create_time,analysis_fail_num FROM `delivery_order` WHERE create_time > '2023-10-01 00:00:00' and  status not in (5,6,7,8) and analysis_fail_num <= 9 ";
 
         if (!empty($logisticNo)) {
             $fixSql .= ' AND logistic_no = "' . $logisticNo . '" ';
@@ -278,12 +150,16 @@ class DeliveryInfoController extends Controller
                 $deliveryStepList = [];
                 $logisticNo = $deliveryOrder['logistic_no'];
                 $logisticId = $deliveryOrder['logistic_id'];
+                $analysisFailNum = $deliveryOrder['analysis_fail_num'];
                 if (in_array($logisticId, [3, 48089])) {
                     $deliveryInfoRes = KdApi::getDeliveryInfo($logisticNo, 'zhongtong'); //获取物流轨迹
                     if (!$deliveryInfoRes['success']) {
+                        DeliveryOrder::updateAll(['analysis_fail_num'=>$analysisFailNum + 1], ['logistic_no' => $logisticNo]);
                         throw new Exception("快递单号：" . $logisticNo . "获取物流轨迹失败，原因：" . $deliveryInfoRes['msg']);
                     }
                     if (empty($deliveryInfoRes['data'])) {
+                        // 假设要更新的表名为 `example_table`，字段名为 `count`
+                        DeliveryOrder::updateAll(['analysis_fail_num'=>$analysisFailNum + 1], ['logistic_no' => $logisticNo]);
                         throw new Exception("快递单号：" . $logisticNo . "获取物流轨迹失败，原因：轨迹信息为空！");
                     }
                     foreach ($deliveryInfoRes['data'] as $key => $datum) {
@@ -293,6 +169,7 @@ class DeliveryInfoController extends Controller
                 } else {
                     $deliveryInfoRes = EmsCloud::getDeliveryInfo($logisticNo); //获取物流轨迹
                     if (empty($deliveryInfoRes['traces'])) {
+                        DeliveryOrder::updateAll(['analysis_fail_num'=>$analysisFailNum + 1], ['logistic_no' => $logisticNo]);
                         throw new Exception("快递单号：" . $logisticNo . "获取物流轨迹失败，原因：轨迹信息为空！");
                     }
                     foreach ($deliveryInfoRes['traces'] as $key => $value) {
@@ -302,6 +179,8 @@ class DeliveryInfoController extends Controller
                 }
 
                 if (empty($deliverySteps)) {
+                    DeliveryOrder::updateAll(['analysis_fail_num'=>$analysisFailNum + 1], ['logistic_no' => $logisticNo]);
+
                     throw new Exception("快递单号：" . $logisticNo . "解析物流轨迹失败，原因：轨迹信息为空！");
                 }
                 $deliveryStepList = Utility::order_date_array($deliverySteps, 'asc', 'operationTime');
