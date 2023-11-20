@@ -166,4 +166,13 @@ class WorkOrderController extends Controller
             }
         }
     }
+
+    /**
+     * ./yii work-order/test
+     */
+    public function actionTest()
+    {
+        echo WorkOrder::generateId();
+
+    }
 }

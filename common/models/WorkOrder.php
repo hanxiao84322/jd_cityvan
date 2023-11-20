@@ -177,7 +177,7 @@ class WorkOrder extends \yii\db\ActiveRecord
 
     public static function generateId()
     {
-        $lasted = self::find()->limit(1)->orderBy('create_time desc')->asArray()->one();
+        $lasted = self::find()->limit(1)->orderBy('id desc')->asArray()->one();
         $p = "WO" . date('ymd');
         if ($lasted && strstr($lasted['work_order_no'], $p)) {
             $last_id = $lasted['work_order_no'];
