@@ -24,10 +24,10 @@ class DeliveryInfoController extends Controller
      */
     public function actionTest($logisticNo = '')
     {
-        $operationDescribe = '您的快件已代签收【家人，已转隆宝邮政所13号到达】，如有疑问请电联快递员【才仁拉措，电话:16697085682】。连接美好，无处不在，感谢您使用中国邮政，期待再次为您服务。';
+        $operationDescribe = '【拉萨市】快件已在黑土共配的【唐古村林周公共服务站】暂放，【取件地址：西藏自治区林周县唐古乡派出所对面代身份证】，请及时取件。如有疑问请联系业务员：17711915307，代理点电话：15890511770，投诉电话：17711915307';
         if (strpos($operationDescribe, '到达') !== false && ((strpos($operationDescribe, '邮政所') !== false) || (strpos($operationDescribe, '揽投部') !== false)) && strpos($operationDescribe, '代签收') === false) {
             echo DeliveryOrder::STATUS_TRANSPORTED;
-        } elseif (strpos($operationDescribe, '配送中') !== false || strpos($operationDescribe, '派送中') !== false) {
+        } elseif (strpos($operationDescribe, '配送中') !== false || strpos($operationDescribe, '派送中') !== false || strpos($operationDescribe, '派件') !== false) {
             echo DeliveryOrder::STATUS_DELIVERING;
         } elseif (((strpos($operationDescribe, '代签收') !== false || strpos($operationDescribe, '自提') !== false || strpos($operationDescribe, '驿站') !== false || strpos($operationDescribe, '村邮站') !== false) && strpos($operationDescribe, '退回') === false) || (strpos($operationDescribe, '签收') !== false && strpos($operationDescribe, '本人') === false && strpos($operationDescribe, '准备') === false)) {
             echo DeliveryOrder::STATUS_REPLACE_DELIVERED;
@@ -239,7 +239,7 @@ class DeliveryInfoController extends Controller
                                 $deliveryOrderModel->transported_time = $operationTime;
                             }
 
-                        } elseif (strpos($operationDescribe, '配送中') !== false || strpos($operationDescribe, '派送中') !== false) {
+                        } elseif (strpos($operationDescribe, '配送中') !== false || strpos($operationDescribe, '派送中') !== false || strpos($operationDescribe, '派件') !== false) {
                             if ($deliveryOrderModel->status < DeliveryOrder::STATUS_DELIVERING) {
                                 $deliveryOrderModel->status = DeliveryOrder::STATUS_DELIVERING;
                             }
