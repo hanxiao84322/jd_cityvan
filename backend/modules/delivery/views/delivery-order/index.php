@@ -134,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                             },
                             'create_delivery_adjust_order' => function ($url, $model) {
-                                if (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) {
+                                if (\Yii::$app->user->getIdentity()['type'] != \backend\models\UserBackend::TYPE_LOGISTIC_CUSTOMER_SERVICE) {
                                     return Html::a('新建调整单', '/delivery/delivery-adjust-order/create?logistic_no=' . $model->logistic_no, ['target' => '_blank']);
                                 }
                             },

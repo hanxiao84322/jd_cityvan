@@ -299,4 +299,9 @@ class DeliveryAdjustOrderController extends Controller
         return $this->redirect(['view', 'id' => $orderId]);
     }
 
+    public function actionApprove()
+    {
+        
+    }
+
 }
