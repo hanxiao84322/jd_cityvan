@@ -148,8 +148,8 @@ class WorkOrderController extends Controller
                         $tmp = explode('.', $file['WorkOrder']['name']['files'][$key]);
                         $suffix = array_pop($tmp);
 
-                        if (!in_array($suffix, ['mp4', 'jpg', 'jpeg', 'mp3'])) {
-                            throw new \Exception('附件格式只支持jpg、mp3、mp4格式');
+                        if (!in_array($suffix, ['mp4', 'wav', 'jpg', 'jpeg', 'mp3'])) {
+                            throw new \Exception('附件格式只支持jpg、mp3、mp4、wav格式');
                         }
                         if ($file['WorkOrder']['size']['files'][$key] > 2097152) {
                             throw new \Exception('附件不能超过2MB');
@@ -253,8 +253,8 @@ class WorkOrderController extends Controller
                         $tmp = explode('.', $file['WorkOrder']['name']['files'][$key]);
                         $suffix = array_pop($tmp);
 
-                        if (!in_array($suffix, ['mp4', 'jpg', 'jpeg', 'mp3'])) {
-                            throw new \Exception('附件格式只支持jpg、mp3、mp4格式');
+                        if (!in_array($suffix, ['mp4', 'wav', 'jpg', 'jpeg', 'mp3'])) {
+                            throw new \Exception('附件格式只支持jpg、mp3、mp4、wav格式');
                         }
                         if ($file['WorkOrder']['size']['files'][$key] > 2097152) {
                             throw new \Exception('附件不能超过2MB');
@@ -357,8 +357,8 @@ class WorkOrderController extends Controller
                         $tmp = explode('.', $file['WorkOrder']['name']['files'][$key]);
                         $suffix = array_pop($tmp);
 
-                        if (!in_array($suffix, ['mp4', 'jpg', 'jpeg', 'mp3'])) {
-                            throw new \Exception('附件格式只支持jpg、mp3、mp4格式');
+                        if (!in_array($suffix, ['mp4', 'wav', 'jpg', 'jpeg', 'mp3'])) {
+                            throw new \Exception('附件格式只支持jpg、mp3、mp4、wav格式');
                         }
                         if ($file['WorkOrder']['size']['files'][$key] > 2097152) {
                             throw new \Exception('附件不能超过2MB');
