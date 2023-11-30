@@ -72,3 +72,27 @@ $this->params['breadcrumbs'][] = $this->title;
         ]); ?>
     </div>
 </div>
+<div class="box">
+    <div class="box-body">
+        <?= \yii\grid\GridView::widget([
+            'dataProvider' => $approveLogProvider,
+            'pager' => [
+                'options' => ['class' => 'hidden']//关闭分页
+            ],
+            'columns' => [
+                'approve_node',
+                [
+                    'attribute' => 'approve_status',
+                    'value' =>
+                        function ($model) {
+                            return \common\models\ApproveLog::getStatusName($model->approve_status);
+                        },
+                ],
+                'approve_opinion',
+                'approve_username',
+                'approve_name',
+                'approve_time',
+            ],
+        ]); ?>
+    </div>
+</div>

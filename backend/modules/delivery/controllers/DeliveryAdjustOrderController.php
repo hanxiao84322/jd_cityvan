@@ -5,9 +5,12 @@ namespace backend\modules\delivery\controllers;
 use backend\models\OrderFiles;
 use backend\models\OrderFilesSearch;
 use common\components\Utility;
+use common\models\ApproveLog;
+use common\models\ApproveLogSearch;
 use common\models\DeliveryAdjustOrder;
 use common\models\DeliveryAdjustOrderSearch;
 use common\models\DeliveryOrder;
+use Psy\Util\Json;
 use yii\data\Pagination;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -71,9 +74,15 @@ class DeliveryAdjustOrderController extends Controller
         $orderFilesSearchParams['OrderFilesSearch']['order_id'] = $model->id;
         $orderFilesSearchParams['OrderFilesSearch']['type'] = OrderFiles::TYPE_DELIVERY_ADJUST_ORDER;
         $orderFilesSearchDataProvider = $orderFilesSearchModel->search($orderFilesSearchParams);
+
+        $approveLogSearch = new ApproveLogSearch();
+        $approveLogSearchParams['ApproveLogSearch']['order_id'] = $model->id;
+        $approveLogSearchParams['ApproveLogSearch']['type'] = ApproveLog::ORDER_TYPE_DELIVERY_ADJUST;
+        $approveLogProvider = $approveLogSearch->search($approveLogSearchParams);
         return $this->render('view', [
             'model' => $model,
-            'orderFilesSearchDataProvider' => $orderFilesSearchDataProvider
+            'orderFilesSearchDataProvider' => $orderFilesSearchDataProvider,
+            'approveLogProvider' => $approveLogProvider
         ]);
     }
 
@@ -104,14 +113,16 @@ class DeliveryAdjustOrderController extends Controller
                     throw new \Exception('该订单已经创建了相同类型的调整单！');
                 }
                 $file = $_FILES;
-                $path = 'uploads/order_files/delivery_adjust_order/' . date('Y-m-d', time()) . '/';
-                if (!file_exists($path) && !mkdir($path, 0777, true)) {
-                    throw new \Exception('创建文件夹失敗！');
-                } else if (!is_writeable($path)) {
-                    throw new \Exception('文件夹不可写！');
-                }
+
                 $orderFilesIds = [];
-                if (!empty($file['DeliveryAdjustOrder']['name']['files']) && !empty($file['DeliveryAdjustOrder']['tmp_name']['files'])) {
+                if (!empty($file['DeliveryAdjustOrder']['name']['files'][0]) && !empty($file['DeliveryAdjustOrder']['tmp_name']['files'][0])) {
+
+                    $path = 'uploads/order_files/delivery_adjust_order/' . date('Y-m-d', time()) . '/';
+                    if (!file_exists($path) && !mkdir($path, 0777, true)) {
+                        throw new \Exception('创建文件夹失敗！');
+                    } else if (!is_writeable($path)) {
+                        throw new \Exception('文件夹不可写！');
+                    }
                     foreach ($file['DeliveryAdjustOrder']['name']['files'] as $key => $value) {
                         $filePath = '';
                         $tmp = explode('.', $file['DeliveryAdjustOrder']['name']['files'][$key]);
@@ -188,7 +199,7 @@ class DeliveryAdjustOrderController extends Controller
                     throw new \Exception('文件夹不可写！');
                 }
                 $orderFilesIds = [];
-                if (!empty($file['DeliveryAdjustOrder']['name']['files']) && !empty($file['DeliveryAdjustOrder']['tmp_name']['files'])) {
+                if (!empty($file['DeliveryAdjustOrder']['name']['files'][0]) && !empty($file['DeliveryAdjustOrder']['tmp_name']['files'][0])) {
                     foreach ($file['DeliveryAdjustOrder']['name']['files'] as $key => $value) {
                         $filePath = '';
                         $tmp = explode('.', $file['DeliveryAdjustOrder']['name']['files'][$key]);
@@ -299,9 +310,140 @@ class DeliveryAdjustOrderController extends Controller
         return $this->redirect(['view', 'id' => $orderId]);
     }
 
-    public function actionApprove()
+    public function actionAjaxFirstApprove()
     {
-        
+        $return = [
+            'status' => 0,
+            'errMsg' => '',
+        ];
+
+        try {
+            $post = \Yii::$app->request->post();
+
+            $deliveryAdjustId = $post['delivery_adjust_id'];
+            $opinion = $post['opinion'];
+            $type = $post['type'];
+
+            $model = $this->findModel($deliveryAdjustId);
+            if ($type == 'approve') {
+                if (!in_array($model->status, [DeliveryAdjustOrder::STATUS_CREATE, DeliveryAdjustOrder::STATUS_FIRST_REJECTED])) {
+                    throw new \Exception('只有新建和一级审核驳回状态可以操作一级审核！');
+                }
+            } else {
+                if (!in_array($model->status, [DeliveryAdjustOrder::STATUS_CREATE])) {
+                    throw new \Exception('只有新建状态可以操作一级驳回！');
+                }
+                if (empty($opinion)) {
+                    throw new \Exception('驳回操作审核备注必须填写！');
+                }
+            }
+            $model->status = ($type == 'approve') ? DeliveryAdjustOrder::STATUS_FIRST_APPROVED : DeliveryAdjustOrder::STATUS_FIRST_REJECTED;
+            $model->first_approve_username = \Yii::$app->user->getIdentity()['username'];
+            $model->first_approve_name = \Yii::$app->user->getIdentity()['name'];
+            $model->first_approve_opinion = $opinion;
+            $model->first_approve_time = date('Y-m-d H:i:s', time());
+            if (!$model->save()) {
+                throw new \Exception(Utility::arrayToString($model->getErrors()));
+            } else {
+                $approveModel = new ApproveLog();
+                $approveModel->order_type = ApproveLog::ORDER_TYPE_DELIVERY_ADJUST;
+                $approveModel->order_id = $model->id;
+                $approveModel->approve_node = '一级审核(系统客服)';
+                $approveModel->approve_status = ($type == 'approve') ? ApproveLog::STATUS_APPROVED : ApproveLog::STATUS_REJECTED;
+                $approveModel->approve_opinion = $model->first_approve_opinion;
+                $approveModel->approve_username = \Yii::$app->user->getIdentity()['username'];
+                $approveModel->approve_name = \Yii::$app->user->getIdentity()['name'];
+                $approveModel->approve_time = date('Y-m-d H:i:s', time());
+                if (!$approveModel->save()) {
+                    throw new \Exception(Utility::arrayToString($approveModel->getErrors()));
+                }
+            }
+            $return['status'] = 1;
+        } catch (\Exception $e) {
+            $return['errMsg'] = $e->getMessage();
+        }
+        exit(Json::encode($return));
     }
 
+    public function actionAjaxSecApprove()
+    {
+
+        $return = [
+            'status' => 0,
+            'errMsg' => '',
+        ];
+
+        try {
+            $post = \Yii::$app->request->post();
+
+            $deliveryAdjustId = $post['delivery_adjust_id'];
+            $opinion = $post['opinion'];
+            $type = $post['type'];
+
+            $model = $this->findModel($deliveryAdjustId);
+
+            if ($type == 'approve') {
+                if (!in_array($model->status, [DeliveryAdjustOrder::STATUS_FIRST_APPROVED, DeliveryAdjustOrder::STATUS_SEC_REJECTED])) {
+                    throw new \Exception('只有新建和二级审核驳回状态可以操作二级审核！');
+                }
+            } else {
+                if (!in_array($model->status, [DeliveryAdjustOrder::STATUS_FIRST_APPROVED])) {
+                    throw new \Exception('只有一级审核通过状态可以操作二级驳回！');
+                }
+                if (empty($opinion)) {
+                    throw new \Exception('驳回操作审核备注必须填写！');
+                }
+            }
+            $model->status = ($type == 'approve') ? DeliveryAdjustOrder::STATUS_SEC_APPROVED : DeliveryAdjustOrder::STATUS_SEC_REJECTED;
+            $model->first_approve_username = \Yii::$app->user->getIdentity()['username'];
+            $model->first_approve_name = \Yii::$app->user->getIdentity()['name'];
+            $model->first_approve_opinion = $opinion;
+            $model->first_approve_time = date('Y-m-d H:i:s', time());
+            if (!$model->save()) {
+                throw new \Exception(Utility::arrayToString($model->getErrors()));
+            } else {
+                $approveModel = new ApproveLog();
+                $approveModel->order_type = ApproveLog::ORDER_TYPE_DELIVERY_ADJUST;
+                $approveModel->order_id = $model->id;
+                $approveModel->approve_node = '二级审核(财务)';
+                $approveModel->approve_status = ($type == 'approve') ? ApproveLog::STATUS_APPROVED : ApproveLog::STATUS_REJECTED;
+                $approveModel->approve_opinion = $model->first_approve_opinion;
+                $approveModel->approve_username = \Yii::$app->user->getIdentity()['username'];
+                $approveModel->approve_name = \Yii::$app->user->getIdentity()['name'];
+                $approveModel->approve_time = date('Y-m-d H:i:s', time());
+                if (!$approveModel->save()) {
+                    throw new \Exception(Utility::arrayToString($approveModel->getErrors()));
+                }
+            }
+            $return['status'] = 1;
+        } catch (\Exception $e) {
+            $return['errMsg'] = $e->getMessage();
+            print_r($return);exit;
+        }
+        exit(Json::encode($return));
+    }
+
+    /**
+     * Lists all DeliveryAdjustOrder models.
+     *
+     * @return string
+     */
+    public function actionWaitApprove()
+    {
+        $searchModel = new DeliveryAdjustOrderSearch();
+        $approveLogSearchParams = $this->request->queryParams;
+        $approveLogSearchParams['DeliveryAdjustOrderSearch']['status'] = '';
+        $dataProvider = $searchModel->search($approveLogSearchParams);
+        $pages = new Pagination(
+            [
+                'totalCount' => isset($dataProvider->totalCount) ? $dataProvider->totalCount : 0,
+                'pageSize' => $searchModel->page_size,
+            ]
+        );
+        return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'pages' => $pages,
+        ]);
+    }
 }
