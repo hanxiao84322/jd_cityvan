@@ -418,7 +418,6 @@ class DeliveryAdjustOrderController extends Controller
             $return['status'] = 1;
         } catch (\Exception $e) {
             $return['errMsg'] = $e->getMessage();
-            print_r($return);exit;
         }
         exit(Json::encode($return));
     }
@@ -432,8 +431,7 @@ class DeliveryAdjustOrderController extends Controller
     {
         $searchModel = new DeliveryAdjustOrderSearch();
         $approveLogSearchParams = $this->request->queryParams;
-        $approveLogSearchParams['DeliveryAdjustOrderSearch']['status'] = '';
-        $dataProvider = $searchModel->search($approveLogSearchParams);
+        $dataProvider = $searchModel->waitApproveSearch($approveLogSearchParams);
         $pages = new Pagination(
             [
                 'totalCount' => isset($dataProvider->totalCount) ? $dataProvider->totalCount : 0,
