@@ -32,14 +32,22 @@ class UserBackend extends \yii\db\ActiveRecord implements IdentityInterface
     const TYPE_CUSTOMER_SERVICE = 2;
     const TYPE_LOGISTIC_CUSTOMER_SERVICE = 3;
 
-    public static array $typeList = [
+    public static  $typeList = [
         self::TYPE_SYSTEM => '系统管理人员',
         self::TYPE_CUSTOMER_SERVICE => '系统客服',
         self::TYPE_LOGISTIC_CUSTOMER_SERVICE => '快递公司客服',
     ];
-    public static array $staffTypeList = [
+    public static  $staffTypeList = [
         self::TYPE_CUSTOMER_SERVICE => '系统客服',
         self::TYPE_LOGISTIC_CUSTOMER_SERVICE => '快递公司客服',
+    ];
+
+    const STATUS_ENABLE = 1;
+    const STATUS_DISABLE = 2;
+
+    public static  $statusList = [
+        self::STATUS_ENABLE => '启用',
+        self::STATUS_DISABLE => '禁用',
     ];
     /**
      * {@inheritdoc}
@@ -203,6 +211,10 @@ class UserBackend extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return isset(self::$typeList[$type]) ? self::$typeList[$type] : '无';
 
+    }
+    public static function getStatusName($status)
+    {
+        return isset(self::$statusList[$status]) ? self::$statusList[$status] : '无';
     }
 
 }

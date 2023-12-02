@@ -36,6 +36,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'name',
                     'email:email',
+                    [
+                        'attribute' => 'status',
+                        'value' =>
+                            function ($model) {
+                                return \backend\models\UserBackend::getStatusName($model->status);
+                            },
+                    ],
                     'created_at',
                     'updated_at',
                     [

@@ -216,11 +216,11 @@ class WorkOrderController extends Controller
             $model = $this->findModel($id);
 
             $userType = \Yii::$app->user->getIdentity()['type'];
-            if ($userType == UserBackend::TYPE_CUSTOMER_SERVICE) {
-                if (\Yii::$app->user->getIdentity()['username'] != $model->assign_username) {
-                    throw new \Exception('只有指派人可以处理工单');
-                }
-            }
+//            if ($userType == UserBackend::TYPE_CUSTOMER_SERVICE) {
+//                if (\Yii::$app->user->getIdentity()['username'] != $model->assign_username) {
+//                    throw new \Exception('只有指派人可以处理工单');
+//                }
+//            }
             if ($userType == UserBackend::TYPE_LOGISTIC_CUSTOMER_SERVICE) {
                 if (!empty($model->operate_username)) {
                     if (\Yii::$app->user->getIdentity()['username'] != $model->operate_username) {

@@ -55,25 +55,31 @@ $this->params['breadcrumbs'][] = $this->title;
                             return Html::a('查看', 'view?id=' . $model->id, ['target' => '_blank']);
                         },
                             'update' => function ($url, $model) {
-                                return Html::a('修改', 'update?id=' . $model->id, ['target' => '_blank']);
+                                if ($model->status != DeliveryAdjustOrder::STATUS_FIRST_APPROVED && $model->status != DeliveryAdjustOrder::STATUS_SEC_APPROVED && $model->status != DeliveryAdjustOrder::STATUS_FINISHED) {
+                                    return Html::a('修改', 'update?id=' . $model->id, ['target' => '_blank']);
+                                }
                             },
                             'first_approve' => function ($url, $model) {
-                if ($model->status == DeliveryAdjustOrder::STATUS_CREATE || $model->status == DeliveryAdjustOrder::STATUS_FIRST_REJECTED) {
-                    return Html::a('一级审核', '#', [
-                        'data-toggle' => 'modal',
-                        'onclick' => 'showModal(' . $model->id . ')',
-                        'data-target' => '#first-approve-modal'    //此处对应Modal组件中设置的id
-                    ]);
-                }
-
+                                if ($model->status == DeliveryAdjustOrder::STATUS_CREATE || $model->status == DeliveryAdjustOrder::STATUS_FIRST_REJECTED) {
+                                    if (Yii::$app->user->can('/delivery/delivery-adjust-order/ajax-first-approve')) {
+                                        return Html::a('一级审核', '#', [
+                                            'data-toggle' => 'modal',
+                                            'onclick' => 'showModal(' . $model->id . ')',
+                                            'data-target' => '#first-approve-modal'    //此处对应Modal组件中设置的id
+                                        ]);
+                                    }
+                                }
                             },
                             'sec_approve' => function ($url, $model) {
                                 if ($model->status == DeliveryAdjustOrder::STATUS_FIRST_APPROVED || $model->status == DeliveryAdjustOrder::STATUS_SEC_REJECTED) {
-                                    return Html::a('二级审核', '#', [
-                                        'data-toggle' => 'modal',
-                                        'onclick' => 'showModal(' . $model->id . ')',
-                                        'data-target' => '#sec-approve-modal'    //此处对应Modal组件中设置的id
-                                    ]);
+                                    if (Yii::$app->user->can('/delivery/delivery-adjust-order/ajax-sec-approve')) {
+                                        return Html::a('二级审核', '#', [
+                                            'data-toggle' => 'modal',
+                                            'onclick' => 'showModal(' . $model->id . ')',
+                                            'data-target' => '#sec-approve-modal'    //此处对应Modal组件中设置的id
+                                        ]);
+                                    }
+
                                 }
 
                             },
@@ -102,16 +108,17 @@ $this->params['breadcrumbs'][] = $this->title;
     'header' => '<h5>一级审核</h5>',
 ]);
 ?>
-    <p>审核备注</p>
-    <p>
-        <?= Html::textarea('opinion', '', ['id' => 'opinion', 'style' => 'width: 500px; height:200px;']) ?>
-        <?= Html::hiddenInput('delivery_adjust_id', '', ['id' => 'delivery_adjust_id']) ?>
-    </p>
-    </p>
-        <p><?= Html::button('通过', ['class' => 'btn btn-primary', 'id' => 'first_approve']) ?>&nbsp;<?= Html::button('驳回', ['class' => 'btn btn-outline-secondary', 'id' => 'first_reject']) ?>&nbsp;</p>
+<p>审核备注</p>
+<p>
+    <?= Html::textarea('opinion', '', ['id' => 'opinion', 'style' => 'width: 500px; height:200px;']) ?>
+    <?= Html::hiddenInput('delivery_adjust_id', '', ['id' => 'delivery_adjust_id']) ?>
+</p>
+</p>
+<p><?= Html::button('通过', ['class' => 'btn btn-primary', 'id' => 'first_approve']) ?>
+    &nbsp;<?= Html::button('驳回', ['class' => 'btn btn-outline-secondary', 'id' => 'first_reject']) ?>&nbsp;</p>
 
-    <p style="margin-top: 20px" id="message">
-    </p>
+<p style="margin-top: 20px" id="message">
+</p>
 <?php
 \yii\bootstrap\Modal::end();
 
@@ -130,7 +137,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= Html::hiddenInput('sec_delivery_adjust_id', '', ['id' => 'sec_delivery_adjust_id']) ?>
 </p>
 </p>
-<p><?= Html::button('通过', ['class' => 'btn btn-primary', 'id' => 'sec_approve']) ?>&nbsp;<?= Html::button('驳回', ['class' => 'btn btn-outline-secondary', 'id' => 'sec_reject']) ?>&nbsp;</p>
+<p><?= Html::button('通过', ['class' => 'btn btn-primary', 'id' => 'sec_approve']) ?>
+    &nbsp;<?= Html::button('驳回', ['class' => 'btn btn-outline-secondary', 'id' => 'sec_reject']) ?>&nbsp;</p>
 
 <p style="margin-top: 20px" id="sec_message">
 </p>
@@ -141,11 +149,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <script>
     <?php $this->beginBlock('js') ?>
-    function showModal(id)
-    {
+    function showModal(id) {
         $('#delivery_adjust_id').val(id);
         $('#sec_delivery_adjust_id').val(id);
     }
+
     $(function () {
         $('#first_approve').click(function () {
             const btn = $('#first_approve');

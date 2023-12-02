@@ -186,7 +186,9 @@ class DeliveryAdjustOrderController extends Controller
     {
         try {
             $model = $this->findModel($id);
-
+            if ($model->status == DeliveryAdjustOrder::STATUS_FIRST_APPROVED || $model->status == DeliveryAdjustOrder::STATUS_SEC_APPROVED) {
+                throw new \Exception('状态是一级审核通过或者二级审核通过不允许修改！');
+            }
             if ($this->request->isPost) {
                 $post = $this->request->post();
                 $model->load($post);

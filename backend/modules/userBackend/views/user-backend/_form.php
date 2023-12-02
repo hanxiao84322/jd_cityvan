@@ -25,6 +25,8 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'logistic_id_list')->label('选择快递公司')->checkboxList(\yii\helpers\ArrayHelper::map(\common\models\LogisticCompany::getAll(),'id', 'company_name'), ['value'=>json_decode($model->logistic_id_list, true)]) ?>
 
             <?= $form->field($model, 'email')->label('邮箱') ?>
+            <?= $form->field($model, 'status')->label('状态')->dropDownList(\backend\models\UserBackend::$statusList, ['prompt' => '---全选---']); ?>
+
             <div class="form-group">
                 <?= Html::submitButton('保存', ['class' => 'btn btn-primary', 'name' => 'signup-button']) ?>
             </div>
