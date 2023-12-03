@@ -546,9 +546,8 @@ logistic_no, ((CASE WHEN(
                     }
                     $province = Cnarea::getParentNameByName($city);
                 }
-                echo $province . "-" . $city . "-" . $district;exit;
-
                 DeliveryOrder::updateAll(['province' => $province, 'city' => $city, 'district' => $district], ['id' => $deliveryOrder['id']]);
+                echo $deliveryOrder['id'] . ":success\r\n";
             } catch (\Exception $e) {
                 echo $e->getMessage() . "\r\n";
             }
