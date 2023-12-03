@@ -1110,7 +1110,7 @@ class Utility
             $city = $matches[count($matches) - 2];
             $address = str_replace($city, '', $address);
         }
-        preg_match('/(.*?(区|县|镇|乡|街道))/', $address, $matches);
+        preg_match('/(.*?(市|区|县|镇|乡|街道))/', $address, $matches);
         if (count($matches) > 1) {
             $district = $matches[count($matches) - 2];
             $address = str_replace($district, '', $address);

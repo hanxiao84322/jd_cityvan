@@ -5,6 +5,7 @@ namespace console\controllers;
 use common\components\TencentCloud;
 use common\components\Utility;
 use common\models\ActionLog;
+use common\models\Cnarea;
 use common\models\Customer;
 use common\models\DeliveryImage;
 use common\models\DeliveryOrder;
@@ -498,6 +499,56 @@ logistic_no, ((CASE WHEN(
                 }
 
                 echo "订单号：" . $deliveryOrder['logistic_no'] . "更新状态成功" . json_encode($deliveryOrder) . "\r\n";
+            } catch (\Exception $e) {
+                echo $e->getMessage() . "\r\n";
+            }
+        }
+        echo "finished";
+    }
+
+    /**
+     * ./yii delivery-order/update-area 16 8408627433501
+     *
+     * @param string $logisticNo
+     * @param string $logisticId
+     * @throws \yii\db\Exception
+     */
+    public function actionUpdateArea($logisticId = '', $logisticNo = '')
+    {
+        $sql = "SELECT receiver_address, id, logistic_no FROM `delivery_order` WHERE create_time > '2023-10-01 00:00:00'";
+        if (!empty($logisticId)) {
+            $sql .= " AND logistic_id = '" . $logisticId . "' ";
+        }
+        if (!empty($logisticNo)) {
+            $sql .= " AND logistic_no = '" . $logisticNo . "' ";
+        }
+
+        $result = \Yii::$app->db->createCommand($sql)->queryAll();
+        if (empty($result)) {
+            echo "没有符合的记录。";
+            exit;
+        }
+        echo "有:" . count($result) . "条数据需要处理\r\n";
+        foreach ($result as $deliveryOrder) {
+            try {
+                $address = Utility::changeToArea($deliveryOrder['receiver_address']);
+
+                $province = empty($deliveryOrder['province']) ? $address['province'] : $deliveryOrder['province'];
+                $city = empty($deliveryOrder['city']) ? $address['city'] : $deliveryOrder['city'];
+                $district = empty($deliveryOrder['district']) ? $address['district'] : $deliveryOrder['district'];
+                $provinceExists = Cnarea::find()->where(['name' => $province])->exists();
+                $cityExists = Cnarea::find()->where(['name' => $city])->exists();
+                if (!$provinceExists) {
+                    if (!$cityExists) {
+                        if (!empty($district)) {
+                            $city = Cnarea::getParentNameByName($district);
+                        }
+                    }
+                    $province = Cnarea::getParentNameByName($city);
+                }
+                echo $province . "-" . $city . "-" . $district;exit;
+
+                DeliveryOrder::updateAll(['province' => $province, 'city' => $city, 'district' => $district], ['id' => $deliveryOrder['id']]);
             } catch (\Exception $e) {
                 echo $e->getMessage() . "\r\n";
             }

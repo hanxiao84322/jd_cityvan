@@ -197,7 +197,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
             'warehouse_code' => '库房编码',
             'shipping_no' => '包裹号',
             'logistic_id' => '快递公司ID',
-            'logistic_company_name' => '物流名称',
+            'logistic_company_name' => '快递公司',
             'order_no' => '订单号',
             'sec_logistic_id' => '	第二物流名称',
             'sec_order_no' => '第二订单号',

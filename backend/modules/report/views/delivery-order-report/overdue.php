@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'warehouse_code',
                     'logistic_company_name',
                     [
-                        'header' => '滞留2天以内',
+                        'header' => '超期2天以内',
                         'format' => 'raw',
                         'value' => function ($model) use ($create_month) {
                             return \yii\helpers\Html::a($model->retention_two_days, 'overdue-items?type=1&create_month=' . $create_month . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);

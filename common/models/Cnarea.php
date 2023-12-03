@@ -115,4 +115,14 @@ class Cnarea extends \yii\db\ActiveRecord
         }
 
     }
+
+    public static function getParentNameByName($areaName)
+    {
+        $parentName = '';
+        $parentCode = self::find()->select('parent_code')->where(['name' => $areaName])->scalar();
+        if (!empty($parentCode)) {
+            $parentName = self::find()->select('name')->where(['area_code' => $parentCode])->scalar();
+        }
+        return $parentName;
+    }
 }
