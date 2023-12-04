@@ -10,9 +10,9 @@ use common\models\Customer;
 use common\models\DeliveryImage;
 use common\models\DeliveryOrder;
 use common\models\ImportantCustomer;
+use common\models\LogisticCompanyTimeliness;
 use common\models\LogisticImage;
 use common\models\WorkOrder;
-use common\models\WorkOrderType;
 use yii\console\Controller;
 
 class DeliveryOrderController extends Controller
@@ -507,7 +507,7 @@ logistic_no, ((CASE WHEN(
     }
 
     /**
-     * ./yii delivery-order/update-area 16 8408627433501
+     * ./yii delivery-order/update-area 16 8458858189301
      *
      * @param string $logisticNo
      * @param string $logisticId
@@ -515,13 +515,15 @@ logistic_no, ((CASE WHEN(
      */
     public function actionUpdateArea($logisticId = '', $logisticNo = '')
     {
-        $sql = "SELECT receiver_address, id, logistic_no FROM `delivery_order` WHERE create_time > '2023-10-01 00:00:00'";
+        $sql = "SELECT id,logistic_no, warehouse_code, logistic_id, province, city, district,receiver_address FROM `delivery_order` WHERE 1 AND create_time >= '2023-12-02' AND create_time <= '2023-12-03' AND logistic_id = '16' and province !='四川省'";
         if (!empty($logisticId)) {
             $sql .= " AND logistic_id = '" . $logisticId . "' ";
         }
         if (!empty($logisticNo)) {
             $sql .= " AND logistic_no = '" . $logisticNo . "' ";
         }
+
+        echo "sql:" . $sql . "\r\n";
 
         $result = \Yii::$app->db->createCommand($sql)->queryAll();
         if (empty($result)) {
@@ -532,22 +534,84 @@ logistic_no, ((CASE WHEN(
         foreach ($result as $deliveryOrder) {
             try {
                 $address = Utility::changeToArea($deliveryOrder['receiver_address']);
+                $province = $address['province'];
+                $city = $address['city'];
+                $district = $address['district'];
 
-                $province = empty($deliveryOrder['province']) ? $address['province'] : $deliveryOrder['province'];
-                $city = empty($deliveryOrder['city']) ? $address['city'] : $deliveryOrder['city'];
-                $district = empty($deliveryOrder['district']) ? $address['district'] : $deliveryOrder['district'];
-                $provinceExists = Cnarea::find()->where(['name' => $province])->exists();
-                $cityExists = Cnarea::find()->where(['name' => $city])->exists();
-                if (!$provinceExists) {
-                    if (!$cityExists) {
-                        if (!empty($district)) {
+                $cityModel = Cnarea::find()->where(['name' => $city])->one();
+                if (!empty($cityModel)) {
+                    if ($cityModel->level != Cnarea::LEVEL_TWO) {
+                        if ($cityModel->level == Cnarea::LEVEL_THREE) {
+                            $district = $cityModel->name;
                             $city = Cnarea::getParentNameByName($district);
                         }
                     }
+                } else {
+                    $districtModel = Cnarea::find()->where(['name' => $district])->one();
+                    if (!empty($districtModel)) {
+                        if ($districtModel->level == Cnarea::LEVEL_THREE) {
+                            $city = Cnarea::getParentNameByName($district);
+                        }
+                    }
+                }
+                $provinceModel = Cnarea::find()->where(['name' => $province])->one();
+                if (empty($provinceModel)) {
                     $province = Cnarea::getParentNameByName($city);
                 }
+
                 DeliveryOrder::updateAll(['province' => $province, 'city' => $city, 'district' => $district], ['id' => $deliveryOrder['id']]);
                 echo $deliveryOrder['id'] . ":success\r\n";
+            } catch (\Exception $e) {
+                echo $e->getMessage() . "\r\n";
+            }
+        }
+        echo "finished";
+    }
+
+    /**
+     * ./yii delivery-order/update-timeliness '2023-12-02' '2023-12-03' '16'
+     *
+     * @param string $startTime
+     * @param string $endTime
+     * @param string $logisticId
+     * @param string $logisticNo
+     * @throws \yii\db\Exception
+     */
+    public function actionUpdateTimeliness($startTime = '', $endTime = '', $logisticId = '', $logisticNo = '')
+    {
+        $sql = "SELECT logistic_no, warehouse_code, logistic_id, province, city, district FROM `delivery_order` WHERE  1 ";
+
+        if (!empty($logisticNo)) {
+            $sql .= " AND logistic_no = '" . $logisticNo . "' ";
+        } else {
+            if (!empty($startTime)) {
+                $sql .= " AND  create_time >= '" . $startTime . "' ";
+            } else {
+                $sql .= " AND  create_time >= ''2023-10-01 00:00:00'' ";
+            }
+            if (!empty($endTime)) {
+                $sql .= " AND  create_time <= '" . $endTime . "' ";
+            }
+            if (!empty($logisticId)) {
+                $sql .= " AND logistic_id = '" . $logisticId . "' ";
+            }
+        }
+        echo "sql:" . $sql . "\r\n";
+        exit;
+        $result = \Yii::$app->db->createCommand($sql)->queryAll();
+        if (empty($result)) {
+            echo "没有符合的记录。";
+            exit;
+        }
+        echo "有:" . count($result) . "条数据需要处理\r\n";
+        foreach ($result as $deliveryOrder) {
+            try {
+
+                $logisticCompanyTimeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($deliveryOrder['warehouse_code'], $deliveryOrder['logistic_id'], $deliveryOrder['province'], $deliveryOrder['city'], $deliveryOrder['district']);
+                if ($logisticCompanyTimeliness) {
+                    DeliveryOrder::updateAll(['timeliness' => $logisticCompanyTimeliness], ['logistic_no' => $deliveryOrder['logistic_no']]);
+                }
+
             } catch (\Exception $e) {
                 echo $e->getMessage() . "\r\n";
             }

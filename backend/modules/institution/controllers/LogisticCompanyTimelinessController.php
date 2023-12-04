@@ -2,6 +2,7 @@
 
 namespace backend\modules\institution\controllers;
 
+use common\models\Cnarea;
 use common\models\LogisticCompanyTimeliness;
 use common\models\LogisticCompanyTimelinessSearch;
 use yii\data\Pagination;
@@ -78,7 +79,11 @@ class LogisticCompanyTimelinessController extends Controller
         $model = new LogisticCompanyTimeliness();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
+            $post = $this->request->post();
+            $post['LogisticCompanyTimeliness']['province'] = Cnarea::getNameByCode($post['LogisticCompanyTimeliness']['province_code']);
+            $post['LogisticCompanyTimeliness']['city'] = empty($post['LogisticCompanyTimeliness']['city_code']) ? '' : Cnarea::getNameByCode($post['LogisticCompanyTimeliness']['city_code']);
+            $post['LogisticCompanyTimeliness']['district'] = empty($post['LogisticCompanyTimeliness']['district_code']) ? '' : Cnarea::getNameByCode($post['LogisticCompanyTimeliness']['district_code']);
+            if ($model->load($post) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         } else {
@@ -101,8 +106,14 @@ class LogisticCompanyTimelinessController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($this->request->isPost) {
+            $post = $this->request->post();
+            $post['LogisticCompanyTimeliness']['province'] = Cnarea::getNameByCode($post['LogisticCompanyTimeliness']['province_code']);
+            $post['LogisticCompanyTimeliness']['city'] = Cnarea::getNameByCode($post['LogisticCompanyTimeliness']['city_code']);
+            $post['LogisticCompanyTimeliness']['district'] = Cnarea::getNameByCode($post['LogisticCompanyTimeliness']['district_code']);
+            if ($model->load($post) && $model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('update', [

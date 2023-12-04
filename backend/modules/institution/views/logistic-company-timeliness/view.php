@@ -23,27 +23,9 @@ $this->params['breadcrumbs'][] = ['label' => '快递公司时效列表', 'url' =
                         return \common\models\LogisticCompany::getNameById($model->logistic_id);
                     },
             ],
-            [
-                'attribute' => 'province',
-                'value' =>
-                    function ($model) {
-                        return \common\models\Cnarea::getNameByCode($model->province);
-                    },
-            ],
-            [
-                'attribute' => 'city',
-                'value' =>
-                    function ($model) {
-                        return \common\models\Cnarea::getNameByCode($model->city);
-                    },
-            ],
-            [
-                'attribute' => 'district',
-                'value' =>
-                    function ($model) {
-                        return \common\models\Cnarea::getNameByCode($model->district);
-                    },
-            ],
+            'province',
+            'city',
+            'district',
             'timeliness',
         ],
     ]) ?>

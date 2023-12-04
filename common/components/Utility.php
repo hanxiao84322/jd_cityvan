@@ -1100,17 +1100,30 @@ class Utility
 
     public static function changeToArea($address)
     {
+        if ((strpos($address, '四川') !== false) && (strpos($address, '省') === false)) {
+            $address = str_replace('四川', '四川省', $address);
+        }
+        if ((strpos($address, '甘肃') !== false) && (strpos($address, '省') === false)) {
+            $address = str_replace('甘肃', '甘肃省', $address);
+        }
+        if ((strpos($address, '青海') !== false) && (strpos($address, '省') === false)) {
+            $address = str_replace('青海', '青海省', $address);
+        }
+        if ((strpos($address, '西藏') !== false) && (strpos($address, '自治区') === false)) {
+            $address = str_replace('西藏', '西藏自治区', $address);
+        }
         preg_match('/(.*?(省|自治区|北京市|天津市|重庆市|上海市))/', $address, $matches);
         if (count($matches) > 1) {
             $province = $matches[count($matches) - 2];
             $address = str_replace($province, '', $address);
         }
-        preg_match('/(.*?(市|自治州|地区|区划|县))/', $address, $matches);
+        preg_match('/(.*?(市|自治州|地区|区划|县|州))/', $address, $matches);
         if (count($matches) > 1) {
             $city = $matches[count($matches) - 2];
             $address = str_replace($city, '', $address);
         }
-        preg_match('/(.*?(市|区|县|镇|乡|街道))/', $address, $matches);
+
+        preg_match('/(.*?(区|县|镇|乡|街道))/', $address, $matches);
         if (count($matches) > 1) {
             $district = $matches[count($matches) - 2];
             $address = str_replace($district, '', $address);

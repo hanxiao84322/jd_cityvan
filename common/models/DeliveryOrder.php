@@ -48,6 +48,7 @@ use common\components\Utility;
  * @property int|null $status 状态 0 同步 01 发货 02 运输开始 03 运输结束 04 配送中 05  本人签收 06 代签收 07 拒收 08 拒收入库
  * @property string|null $latest_track_info 最后一条物流轨迹信息
  * @property string $latest_track_time 最后一条物流轨迹时间
+ * @property string $timeliness 时效（天）
  * @property int|null $is_batch_update 是否批量更新 0 否 1 是
  * @property int|null $is_delay 延误标签 0 否 1 是 妥投时间大于应到时间
  * @property int|null $is_retention 是否超期 0 否 1 是
@@ -174,7 +175,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['logistic_id', 'sec_logistic_id', 'shipping_num', 'status', 'is_batch_update', 'is_delay', 'is_agent_settle', 'is_customer_settle', 'is_logistic_company_settle', 'is_unusual', 'is_deduction', 'is_retention', 'is_serious_retention', 'is_overdue'], 'integer'],
+            [['logistic_id', 'sec_logistic_id', 'shipping_num', 'status', 'is_batch_update', 'is_delay', 'is_agent_settle', 'is_customer_settle', 'is_logistic_company_settle', 'is_unusual', 'is_deduction', 'is_retention', 'is_serious_retention', 'is_overdue', 'timeliness'], 'integer'],
             [['order_weight', 'order_weight_rep', 'shipping_weight', 'shipping_weight_rep', 'post_office_weight', 'order_total_price', 'total_price'], 'number'],
             [['jd_send_time', 'send_time', 'receive_time', 'package_collection_time', 'transporting_time', 'transported_time', 'delivering_time', 'allocation_time', 'delivered_time', 'replace_delivered_time', 'reject_time', 'reject_in_warehouse_time', 'finish_time', 'estimate_time', 'latest_track_time', 'create_time', 'update_time'], 'safe'],
             [['logistic_no', 'warehouse_code', 'shipping_no'], 'string', 'max' => 50],
@@ -230,6 +231,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
             'status' => '状态',
             'latest_track_info' => '最后一条物流轨迹信息',
             'latest_track_time' => '最后一条物流轨迹时间',
+            'timeliness' => '时效（天）',
             'is_batch_update' => '是否批量更新',
             'is_delay' => '是否延误',
             'is_retention' => '是否超期',
@@ -361,6 +363,19 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                 if (empty($orderNo)) {
                     continue;
                 }
+
+                $provinceExists = Cnarea::find()->where(['name' => $province])->exists();
+                $cityExists = Cnarea::find()->where(['name' => $city])->exists();
+                if (!$provinceExists) {
+                    if (!$cityExists) {
+                        if (!empty($district)) {
+                            $city = Cnarea::getParentNameByName($district);
+                        }
+                    }
+                    $province = Cnarea::getParentNameByName($city);
+                }
+
+
                 $isUnusual = 0;
                 if (strlen($receiverName) > 40) {
                     $isUnusual = 1;
@@ -386,6 +401,13 @@ class DeliveryOrder extends \yii\db\ActiveRecord
 //                } else {
 //                    $logisticId = $logisticCompanyRes['id'];
 //                }
+
+                $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
+                if (empty($timeliness)) {
+                    $timeliness = 0;
+                }
+
+
                 $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo])->exists();
                 if (!$deliveryOrderExists) {
                     $deliveryOrderModel = new DeliveryOrder();
@@ -400,6 +422,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                 }
                 $deliveryOrderModel->warehouse_code = $warehouseCode;
                 $deliveryOrderModel->jd_send_time = $jdSendTime;
+                $deliveryOrderModel->timeliness = $timeliness;
                 $deliveryOrderModel->order_no = $orderNo;
                 $deliveryOrderModel->shipping_num = $shippingNum;
                 $deliveryOrderModel->order_weight = $orderWeight;
