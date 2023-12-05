@@ -529,14 +529,14 @@ logistic_no, ((CASE WHEN(
         echo "sql:" . $sql . "\r\n";
 
         $result = \Yii::$app->db->createCommand($sql)->queryAll();
-        if (empty($result)) {   
+        if (empty($result)) {
             echo "没有符合的记录。";
             exit;
         }
         echo "有:" . count($result) . "条数据需要处理\r\n";
         foreach ($result as $deliveryOrder) {
             try {
-                $addressSql = "SELECT `name` FROM `cnarea_2020` WHERE '" . $deliveryOrder['receiver_address'] . "' LIKE CONCAT('%', `name`, '%') and level = 2 LIMIT 1";
+                $addressSql = "SELECT `name` FROM `cnarea_2020` WHERE '" . $deliveryOrder['receiver_address'] . "' LIKE CONCAT('%', `name`, '%') and level = 2 and (merger_name like \"%四川%\" or merger_name like \"%青海%\" or merger_name like \"%西藏%\" or merger_name like \"%甘肃%\")";
                 $addressResult = \Yii::$app->db->createCommand($addressSql)->queryOne();
                 if (!empty($addressResult)) {
                     $district = $addressResult['name'];
