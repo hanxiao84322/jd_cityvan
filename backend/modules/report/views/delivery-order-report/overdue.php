@@ -9,7 +9,7 @@ use yii\grid\GridView;
 /** @var yii\data\ActiveDataProvider $dataProvider */
 /* @var $pages yii\data\ActiveDataProvider */
 
-$this->title = '超期预警报表';
+$this->title = '状态滞留报表';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="delivery-order-index">

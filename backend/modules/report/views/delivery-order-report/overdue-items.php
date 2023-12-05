@@ -13,7 +13,7 @@ use yii\widgets\ActiveForm;
 /** @var string $typeName */
 
 
-$this->title = '超期预警报表明细';
+$this->title = '状态滞留报表明细';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="delivery-order-index">
