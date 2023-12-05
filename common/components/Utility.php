@@ -1112,22 +1112,42 @@ class Utility
         if ((strpos($address, '西藏') !== false) && (strpos($address, '自治区') === false)) {
             $address = str_replace('西藏', '西藏自治区', $address);
         }
-        preg_match('/(.*?(省|自治区|北京市|天津市|重庆市|上海市))/', $address, $matches);
-        if (count($matches) > 1) {
-            $province = $matches[count($matches) - 2];
-            $address = str_replace($province, '', $address);
-        }
-        preg_match('/(.*?(市|自治州|地区|区划|县|州))/', $address, $matches);
-        if (count($matches) > 1) {
-            $city = $matches[count($matches) - 2];
-            $address = str_replace($city, '', $address);
-        }
+//        preg_match('/(.*?(省|自治区|北京市|天津市|重庆市|上海市))/', $address, $matches);
+//        if (count($matches) > 1) {
+//            $province = $matches[count($matches) - 2];
+//            $address = str_replace($province, '', $address);
+//        }
+//        preg_match('/(.*?(市|自治州|地区|区划|县|州))/', $address, $matches);
+//        if (count($matches) > 1) {
+//            $city = $matches[count($matches) - 2];
+//            $address = str_replace($city, '', $address);
+//        }
+//
+//        preg_match('/(.*?(区|县|镇|乡|街道))/', $address, $matches);
+//        if (count($matches) > 1) {
+//            $district = $matches[count($matches) - 2];
+//            $address = str_replace($district, '', $address);
+//        }
 
-        preg_match('/(.*?(区|县|镇|乡|街道))/', $address, $matches);
-        if (count($matches) > 1) {
-            $district = $matches[count($matches) - 2];
-            $address = str_replace($district, '', $address);
+        // 定义省市区的正则表达式
+        // 定义省市区的正则表达式
+        // 定义省市区的正则表达式
+        $pattern = '/(?:.*?)?(?:(?<province>[^省]+省|.*?自治区|.*?特别行政区))(?:.*?)?(?:(?<city>[^市]+市|.*?自治州))(?:.*?)?(?:(?<district>[^县]+县|.*?区|.*?市|.*?旗|.*?岛))(?:.*)?/u';
+
+// 使用正则表达式匹配省市区字段
+        if (preg_match($pattern, $address, $matches)) {
+            $province = isset($matches['province']) ? trim($matches['province']) : '';
+            $city = isset($matches['city']) ? trim($matches['city']) : '';
+            $district = isset($matches['district']) ? trim($matches['district']) : '';
+
+
+            echo "省份：".$province. "\n";
+            echo "城市：".$city. "\n";
+            echo "区县：".$district. "\n";
+        } else {
+            echo "无法匹配到省市区字段。\n";
         }
+exit;
         return [
             'province' => isset($province) ? $province : '',
             'city' => isset($city) ? $city : '',

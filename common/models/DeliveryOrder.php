@@ -363,19 +363,6 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                 if (empty($orderNo)) {
                     continue;
                 }
-
-                $provinceExists = Cnarea::find()->where(['name' => $province])->exists();
-                $cityExists = Cnarea::find()->where(['name' => $city])->exists();
-                if (!$provinceExists) {
-                    if (!$cityExists) {
-                        if (!empty($district)) {
-                            $city = Cnarea::getParentNameByName($district);
-                        }
-                    }
-                    $province = Cnarea::getParentNameByName($city);
-                }
-
-
                 $isUnusual = 0;
                 if (strlen($receiverName) > 40) {
                     $isUnusual = 1;
@@ -401,6 +388,27 @@ class DeliveryOrder extends \yii\db\ActiveRecord
 //                } else {
 //                    $logisticId = $logisticCompanyRes['id'];
 //                }
+
+                $cityModel = Cnarea::find()->where(['name' => $city])->one();
+                if (!empty($cityModel)) {
+                    if ($cityModel->level != Cnarea::LEVEL_TWO) {
+                        if ($cityModel->level == Cnarea::LEVEL_THREE) {
+                            $district = $cityModel->name;
+                            $city = Cnarea::getParentNameByName($district);
+                        }
+                    }
+                } else {
+                    $districtModel = Cnarea::find()->where(['name' => $district])->one();
+                    if (!empty($districtModel)) {
+                        if ($districtModel->level == Cnarea::LEVEL_THREE) {
+                            $city = Cnarea::getParentNameByName($district);
+                        }
+                    }
+                }
+                $provinceModel = Cnarea::find()->where(['name' => $province])->one();
+                if (empty($provinceModel)) {
+                    $province = Cnarea::getParentNameByName($city);
+                }
 
                 $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
                 if (empty($timeliness)) {

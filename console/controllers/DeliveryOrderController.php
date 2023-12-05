@@ -515,7 +515,10 @@ logistic_no, ((CASE WHEN(
      */
     public function actionUpdateArea($logisticId = '', $logisticNo = '')
     {
-        $sql = "SELECT id,logistic_no, warehouse_code, logistic_id, province, city, district,receiver_address FROM `delivery_order` WHERE create_time > '2023-10-01'";
+
+
+        $sql = "SELECT id,logistic_no, warehouse_code, logistic_id, province, city, district,receiver_address FROM `delivery_order` WHERE 1 AND create_time >= '2023-12-02' AND create_time <= '2023-12-03' AND logistic_id = '16' and province !='四川省';";
+//        $sql = "SELECT id,logistic_no, warehouse_code, logistic_id, province, city, district,receiver_address FROM `delivery_order` WHERE create_time > '2023-10-01'";
         if (!empty($logisticId)) {
             $sql .= " AND logistic_id = '" . $logisticId . "' ";
         }
@@ -526,40 +529,22 @@ logistic_no, ((CASE WHEN(
         echo "sql:" . $sql . "\r\n";
 
         $result = \Yii::$app->db->createCommand($sql)->queryAll();
-        if (empty($result)) {
+        if (empty($result)) {   
             echo "没有符合的记录。";
             exit;
         }
         echo "有:" . count($result) . "条数据需要处理\r\n";
         foreach ($result as $deliveryOrder) {
             try {
-                $address = Utility::changeToArea($deliveryOrder['receiver_address']);
-                $province = $address['province'];
-                $city = $address['city'];
-                $district = $address['district'];
-
-                $cityModel = Cnarea::find()->where(['name' => $city])->one();
-                if (!empty($cityModel)) {
-                    if ($cityModel->level != Cnarea::LEVEL_TWO) {
-                        if ($cityModel->level == Cnarea::LEVEL_THREE) {
-                            $district = $cityModel->name;
-                            $city = Cnarea::getParentNameByName($district);
-                        }
-                    }
-                } else {
-                    $districtModel = Cnarea::find()->where(['name' => $district])->one();
-                    if (!empty($districtModel)) {
-                        if ($districtModel->level == Cnarea::LEVEL_THREE) {
-                            $city = Cnarea::getParentNameByName($district);
-                        }
-                    }
-                }
-                $provinceModel = Cnarea::find()->where(['name' => $province])->one();
-                if (empty($provinceModel)) {
+                $addressSql = "SELECT `name` FROM `cnarea_2020` WHERE '" . $deliveryOrder['receiver_address'] . "' LIKE CONCAT('%', `name`, '%') and level = 2 LIMIT 1";
+                $addressResult = \Yii::$app->db->createCommand($addressSql)->queryOne();
+                if (!empty($addressResult)) {
+                    $district = $addressResult['name'];
+                    $city = Cnarea::getParentNameByName($district);
                     $province = Cnarea::getParentNameByName($city);
+                    DeliveryOrder::updateAll(['province' => $province, 'city' => $city, 'district' => $district], ['id' => $deliveryOrder['id']]);
                 }
 
-                DeliveryOrder::updateAll(['province' => $province, 'city' => $city, 'district' => $district], ['id' => $deliveryOrder['id']]);
                 echo $deliveryOrder['id'] . ":success\r\n";
             } catch (\Exception $e) {
                 echo $e->getMessage() . "\r\n";
