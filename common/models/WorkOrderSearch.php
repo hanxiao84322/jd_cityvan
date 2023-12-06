@@ -116,7 +116,7 @@ class WorkOrderSearch extends WorkOrder
      */
     public function exportData($params, $dataPower)
     {
-        $query = WorkOrder::find()->select("wo.*,wot.name as work_order_type_name, lc.company_name as logistic_company_name")->alias('wo')->leftJoin(WorkOrderType::tableName() . ' wot', 'wo.type = wot.id')->leftJoin(LogisticCompany::tableName() . ' lc', 'wo.logistic_id = lc.id');
+        $query = WorkOrder::find()->select("wo.*,wot.name as work_order_type_name, lc.company_name as logistic_company_name, ub.name as assign_name")->alias('wo')->leftJoin(WorkOrderType::tableName() . ' wot', 'wo.type = wot.id')->leftJoin(LogisticCompany::tableName() . ' lc', 'wo.logistic_id = lc.id')->leftJoin(UserBackend::tableName() . ' ub', 'ub.username = wo.assign_username');
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -128,37 +128,45 @@ class WorkOrderSearch extends WorkOrder
         if (!empty($dataPower)) {
             if (isset($dataPower['logisticIds'])) {
                 $query->andFilterWhere(['in', 'wo.logistic_id', json_decode($dataPower['logisticIds'], true)]);
+                $query->andFilterWhere(['!=', 'wo.status', self::STATUS_DEALT]);
             }
         }
-        if ($this->is_not_finished) {
-            $query->andFilterWhere(['!=', 'wo.status', self::STATUS_FINISHED]);
-        }
-        if (empty($this->create_time_start)) {
-            $this->create_time_start = date('Y-m-d 00:00:00', strtotime('-30 day'));
-        }
-        if (empty($this->create_time_end)) {
-            $this->create_time_end = date('Y-m-d 23:59:59', time());
-        }
-        if (!empty($this->create_time_start)) {
-            $query->andWhere(['>=', 'wo.create_time', $this->create_time_start]);
-        }
-        if (!empty($this->create_time_end)) {
-            $query->andWhere(['<=', 'wo.create_time', $this->create_time_end]);
-        }
-        $query->andFilterWhere(['wo.logistic_no' => $this->logistic_no]);
+        if (!empty($this->work_order_no) || !empty($this->logistic_no) || !empty($this->order_no)) {
+            $query->andFilterWhere(['wo.logistic_no' => $this->logistic_no]);
+            $query->andFilterWhere(['wo.order_no' => $this->order_no]);
+            $query->andFilterWhere(['wo.work_order_no' => $this->work_order_no]);
+        } else {
+            if (empty($this->status)) {
+                $query->andFilterWhere(['!=', 'wo.status', self::STATUS_FINISHED]);
+            }
 
-        $query->andFilterWhere(['wo.order_no' => $this->order_no]);
-        $query->andFilterWhere(['wo.work_order_no' => $this->work_order_no]);
-        $query->andFilterWhere(['wo.warehouse_code' => $this->warehouse_code]);
-        $query->andFilterWhere(['wo.logistic_id' => $this->logistic_id]);
-        $query->andFilterWhere(['wo.assign_username' => $this->assign_username]);
-        $query->andFilterWhere(['wo.create_username' => $this->create_username]);
-        $query->andFilterWhere(['wo.operate_username' => $this->operate_username]);
-        $query->andFilterWhere(['wo.system_create' => $this->system_create]);
-        $query->andFilterWhere(['wo.ordinary_create' => $this->ordinary_create]);
-        $query->andFilterWhere(['wo.jd_create' => $this->jd_create]);
-        $query->andFilterWhere(['wo.type' => $this->type]);
-        $query->andFilterWhere(['wo.status' => $this->status]);
+            if (empty($this->create_time_start)) {
+                $this->create_time_start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+            }
+            if (empty($this->create_time_end)) {
+                $this->create_time_end = date('Y-m-d 23:59:59', time());
+            }
+            if (!empty($this->create_time_start)) {
+                $query->andWhere(['>=', 'wo.create_time', $this->create_time_start]);
+            }
+            if (!empty($this->create_time_end)) {
+                $query->andWhere(['<=', 'wo.create_time', $this->create_time_end]);
+            }
+
+            $query->andFilterWhere(['wo.operate_username' => $this->operate_username]);
+
+            $query->andFilterWhere(['wo.warehouse_code' => $this->warehouse_code]);
+            $query->andFilterWhere(['wo.logistic_id' => $this->logistic_id]);
+            $query->andFilterWhere(['wo.assign_username' => $this->assign_username]);
+            $query->andFilterWhere(['wo.create_username' => $this->create_username]);
+            $query->andFilterWhere(['wo.system_create' => $this->system_create]);
+            $query->andFilterWhere(['wo.ordinary_create' => $this->ordinary_create]);
+            $query->andFilterWhere(['wo.jd_create' => $this->jd_create]);
+            $query->andFilterWhere(['wo.jd_work_order_no' => $this->jd_work_order_no]);
+            $query->andFilterWhere(['wo.type' => $this->type]);
+            $query->andFilterWhere(['wo.status' => $this->status]);
+        }
+
 
         $query->orderBy('create_time DESC');
 

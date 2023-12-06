@@ -11,7 +11,7 @@ class LogisticCompanyTimelinessController extends Controller
 {
     /**
      *
-         * ./yii logistic-company-timeliness/run '2023-12-04' '' '' ''
+     * ./yii logistic-company-timeliness/run '2023-12-04' '' '' ''
      *
      * @param string $startTime
      * @param string $endTime
