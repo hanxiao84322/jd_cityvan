@@ -515,7 +515,7 @@ logistic_no, ((CASE WHEN(
      */
     public function actionUpdateArea($logisticId = '', $logisticNo = '')
     {
-        $sql = "SELECT id,logistic_no, warehouse_code, logistic_id, province, city, district,receiver_address FROM `delivery_order` WHERE  create_time >= '2023-10-01' AND  province not in ('四川省', '青海省', '甘肃省', '西藏自治区');";
+        $sql = "SELECT id,logistic_no, warehouse_code, logistic_id, province, city, district,receiver_address FROM `delivery_order` WHERE  create_time >= '2023-12-05' AND  province not in ('四川省', '青海省', '甘肃省', '西藏自治区');";
 //        $sql = "SELECT id,logistic_no, warehouse_code, logistic_id, province, city, district,receiver_address FROM `delivery_order` WHERE create_time > '2023-10-01'";
         if (!empty($logisticId)) {
             $sql .= " AND logistic_id = '" . $logisticId . "' ";
