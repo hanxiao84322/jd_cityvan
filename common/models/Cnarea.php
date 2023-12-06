@@ -125,5 +125,4 @@ class Cnarea extends \yii\db\ActiveRecord
         }
         return $parentName;
     }
-
 }
