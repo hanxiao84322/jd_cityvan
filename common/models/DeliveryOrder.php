@@ -389,33 +389,15 @@ class DeliveryOrder extends \yii\db\ActiveRecord
 //                    $logisticId = $logisticCompanyRes['id'];
 //                }
 
-                $cityModel = Cnarea::find()->where(['name' => $city])->one();
-                if (!empty($cityModel)) {
-                    if ($cityModel->level != Cnarea::LEVEL_TWO) {
-                        if ($cityModel->level == Cnarea::LEVEL_THREE) {
-                            $district = $cityModel->name;
-                            $city = Cnarea::getParentNameByName($district);
-                        }
-                    }
-                } else {
-                    $districtModel = Cnarea::find()->where(['name' => $district])->one();
-                    if (!empty($districtModel)) {
-                        if ($districtModel->level == Cnarea::LEVEL_THREE) {
-                            $city = Cnarea::getParentNameByName($district);
-                        }
-                    }
-                }
-                $provinceModel = Cnarea::find()->where(['name' => $province])->one();
-                if (empty($provinceModel)) {
+                $addressSql = "SELECT `name` FROM `cnarea_2020` WHERE '" . $receiverAddress . "' LIKE CONCAT('%', `name`, '%') and level = 2 and (merger_name like \"%四川%\" or merger_name like \"%青海%\" or merger_name like \"%西藏%\" or merger_name like \"%甘肃%\")";
+
+                $addressResult = \Yii::$app->db->createCommand($addressSql)->queryOne();
+                if (!empty($addressResult)) {
+                    $district = $addressResult['name'];
+                    $city = Cnarea::getParentNameByName($district);
                     $province = Cnarea::getParentNameByName($city);
+                    $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
                 }
-
-                $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
-                if (empty($timeliness)) {
-                    $timeliness = 0;
-                }
-
-
                 $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo])->exists();
                 if (!$deliveryOrderExists) {
                     $deliveryOrderModel = new DeliveryOrder();
@@ -430,7 +412,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                 }
                 $deliveryOrderModel->warehouse_code = $warehouseCode;
                 $deliveryOrderModel->jd_send_time = $jdSendTime;
-                $deliveryOrderModel->timeliness = $timeliness;
+                $deliveryOrderModel->timeliness = !empty($timeliness) ? $timeliness : 0;
                 $deliveryOrderModel->order_no = $orderNo;
                 $deliveryOrderModel->shipping_num = $shippingNum;
                 $deliveryOrderModel->order_weight = $orderWeight;
