@@ -24,14 +24,14 @@ class DeliveryInfoController extends Controller
      */
     public function actionTest($logisticNo = '')
     {
-        $operationDescribe = '拉萨市】快件已由【门卫值班室代】签收,如有疑问请电联派件业务员：17397117708，签收网点电话：0891-6622010，投诉电话：13781151956。感谢使用中通快递，期待再次为您服务！';
+        $operationDescribe = '【拉萨市】快件已由【本人-单位信箱】签收,如有疑问请电联派件业务员：17324504119，签收网点电话：18689006723，投诉电话：18280805426。感谢使用中通快递，期待再次为您服务！';
         if (strpos($operationDescribe, '到达') !== false && ((strpos($operationDescribe, '邮政所') !== false) || (strpos($operationDescribe, '揽投部') !== false)) && strpos($operationDescribe, '代签收') === false) {
             echo DeliveryOrder::STATUS_TRANSPORTED;
         } elseif (strpos($operationDescribe, '配送中') !== false || strpos($operationDescribe, '派送中') !== false || (strpos($operationDescribe, '派件') !== false && strpos($operationDescribe, '签收') === false)) {
             echo DeliveryOrder::STATUS_DELIVERING;
-        } elseif (((strpos($operationDescribe, '代签收') !== false || strpos($operationDescribe, '自提') !== false || strpos($operationDescribe, '驿站') !== false || strpos($operationDescribe, '村邮站') !== false) && strpos($operationDescribe, '退回') === false) || (strpos($operationDescribe, '签收') !== false && strpos($operationDescribe, '本人') === false && strpos($operationDescribe, '准备') === false)) {
+        } elseif (((strpos($operationDescribe, '代签收') !== false || strpos($operationDescribe, '自提') !== false || strpos($operationDescribe, '驿站') !== false || strpos($operationDescribe, '村邮站') !== false || strpos($operationDescribe, '【本人-转邮政】签收') !== false) && strpos($operationDescribe, '退回') === false) || (strpos($operationDescribe, '签收') !== false && (strpos($operationDescribe, '本人') === false && strpos($operationDescribe, '准备') === false))) {
             echo DeliveryOrder::STATUS_REPLACE_DELIVERED;
-        } elseif (strpos($operationDescribe, '本人签收') !== false) {
+        } elseif (strpos($operationDescribe, '本人签收') !== false || (strpos($operationDescribe, '本人') !== false && strpos($operationDescribe, '签收') !== false)) {
             echo DeliveryOrder::STATUS_DELIVERED;
         } elseif (strpos($operationDescribe, '退回') !== false || strpos($operationDescribe, '退件') !== false || strpos($operationDescribe, '寄件人签收') !== false || strpos($operationDescribe, '成功退回至寄件人') !== false) {
             echo DeliveryOrder::STATUS_REJECT;
@@ -247,13 +247,13 @@ class DeliveryInfoController extends Controller
                                 $deliveryOrderModel->delivering_time = $operationTime;
                             }
 
-                        } elseif (((strpos($operationDescribe, '代签收') !== false || strpos($operationDescribe, '自提') !== false || strpos($operationDescribe, '驿站') !== false || strpos($operationDescribe, '村邮站') !== false) && strpos($operationDescribe, '退回') === false) || (strpos($operationDescribe, '签收') !== false && strpos($operationDescribe, '本人') === false && strpos($operationDescribe, '准备') === false)) {
+                        } elseif (((strpos($operationDescribe, '代签收') !== false || strpos($operationDescribe, '自提') !== false || strpos($operationDescribe, '驿站') !== false || strpos($operationDescribe, '村邮站') !== false || strpos($operationDescribe, '【本人-转邮政】签收') !== false) && strpos($operationDescribe, '退回') === false) || (strpos($operationDescribe, '签收') !== false && (strpos($operationDescribe, '本人') === false && strpos($operationDescribe, '准备') === false))) {
                             if ($deliveryOrderModel->status < DeliveryOrder::STATUS_REPLACE_DELIVERED) {
                                 $deliveryOrderModel->status = DeliveryOrder::STATUS_REPLACE_DELIVERED;
                                 $deliveryOrderModel->replace_delivered_time = $operationTime;
                                 $deliveryOrderModel->finish_time = $operationTime;
                             }
-                        } elseif (strpos($operationDescribe, '本人签收') !== false || strpos($operationDescribe, '【本人】签收') !== false) {
+                        } elseif (strpos($operationDescribe, '本人签收') !== false || (strpos($operationDescribe, '本人') !== false && strpos($operationDescribe, '签收') !== false) || strpos($operationDescribe, '【本人】签收') !== false) {
                             if ($deliveryOrderModel->status < DeliveryOrder::STATUS_DELIVERED) {
                                 $deliveryOrderModel->status = DeliveryOrder::STATUS_DELIVERED;
                                 $deliveryOrderModel->delivered_time = $operationTime;
@@ -436,13 +436,13 @@ class DeliveryInfoController extends Controller
                                 $deliveryOrderModel->delivering_time = $operationTime;
                             }
 
-                        } elseif (((strpos($operationDescribe, '代签收') !== false || strpos($operationDescribe, '自提') !== false || strpos($operationDescribe, '驿站') !== false || strpos($operationDescribe, '村邮站') !== false) && strpos($operationDescribe, '退回') === false) || (strpos($operationDescribe, '签收') !== false && strpos($operationDescribe, '本人') === false && strpos($operationDescribe, '准备') === false)) {
+                        } elseif (((strpos($operationDescribe, '代签收') !== false || strpos($operationDescribe, '自提') !== false || strpos($operationDescribe, '驿站') !== false || strpos($operationDescribe, '村邮站') !== false || strpos($operationDescribe, '【本人-转邮政】签收') !== false) && strpos($operationDescribe, '退回') === false) || (strpos($operationDescribe, '签收') !== false && (strpos($operationDescribe, '本人') === false && strpos($operationDescribe, '准备') === false))) {
                             if ($deliveryOrderModel->status < DeliveryOrder::STATUS_REPLACE_DELIVERED) {
                                 $deliveryOrderModel->status = DeliveryOrder::STATUS_REPLACE_DELIVERED;
                                 $deliveryOrderModel->replace_delivered_time = $operationTime;
                                 $deliveryOrderModel->finish_time = $operationTime;
                             }
-                        } elseif (strpos($operationDescribe, '本人签收') !== false || strpos($operationDescribe, '【本人】签收') !== false) {
+                        } elseif (strpos($operationDescribe, '本人签收') !== false || (strpos($operationDescribe, '本人') !== false && strpos($operationDescribe, '签收') !== false) || strpos($operationDescribe, '【本人】签收') !== false) {
                             if ($deliveryOrderModel->status < DeliveryOrder::STATUS_DELIVERED) {
                                 $deliveryOrderModel->status = DeliveryOrder::STATUS_DELIVERED;
                                 $deliveryOrderModel->delivered_time = $operationTime;
