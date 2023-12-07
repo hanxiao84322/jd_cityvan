@@ -57,7 +57,7 @@ class LogisticCompanyTimelinessSearch extends LogisticCompanyTimeliness
             // $query->where('0=1');
             return $dataProvider;
         }
-
+        $query->andFilterWhere(['status' => LogisticCompanyTimeliness::STATUS_NORMAL]);
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,

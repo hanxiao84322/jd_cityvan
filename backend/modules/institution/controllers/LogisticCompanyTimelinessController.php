@@ -5,6 +5,7 @@ namespace backend\modules\institution\controllers;
 use common\models\Cnarea;
 use common\models\LogisticCompanyTimeliness;
 use common\models\LogisticCompanyTimelinessSearch;
+use Psy\Util\Json;
 use yii\data\Pagination;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -149,5 +150,17 @@ class LogisticCompanyTimelinessController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionAjaxDelete()
+    {
+        $return = [
+            'status' => 0,
+            'msg' => '',
+        ];
+        $id = \Yii::$app->request->get('id', '');
+        LogisticCompanyTimeliness::updateAll(['status' => LogisticCompanyTimeliness::STATUS_DELETE], ['id' => $id]);
+        $return['status'] = true;
+        exit(Json::encode($return));
     }
 }

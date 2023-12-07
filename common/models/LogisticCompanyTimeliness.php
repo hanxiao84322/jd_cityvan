@@ -17,9 +17,18 @@ use Yii;
  * @property string $district 区县
  * @property string $district_code 区县
  * @property int $timeliness  时效（天）
+ * @property int $status 状态
  */
 class LogisticCompanyTimeliness extends \yii\db\ActiveRecord
 {
+    const STATUS_NORMAL = 1;
+    const STATUS_DELETE = 2;
+
+    public static  $statusList = [
+        self::STATUS_NORMAL => '正常',
+        self::STATUS_DELETE => '删除',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -35,7 +44,7 @@ class LogisticCompanyTimeliness extends \yii\db\ActiveRecord
     {
         return [
             [['warehouse_code', 'logistic_id', 'province', 'timeliness'], 'required'],
-            [['logistic_id', 'timeliness'], 'integer'],
+            [['logistic_id', 'timeliness', 'status'], 'integer'],
             [['warehouse_code', 'province', 'city', 'district', 'province_code', 'city_code', 'district_code'], 'string', 'max' => 20],
             [['warehouse_code', 'logistic_id', 'province', 'city', 'district'], 'unique', 'targetAttribute' => ['warehouse_code', 'logistic_id', 'province', 'city', 'district']],
         ];
@@ -57,6 +66,7 @@ class LogisticCompanyTimeliness extends \yii\db\ActiveRecord
             'district' => '区/县',
             'district_code' => '区/县',
             'timeliness' => '时效（天）',
+            'status' => '状态',
         ];
     }
 

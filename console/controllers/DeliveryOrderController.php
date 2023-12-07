@@ -562,7 +562,21 @@ logistic_no, ((CASE WHEN(
      */
     public function actionUpdateTimeliness($startTime = '', $endTime = '', $logisticId = '', $logisticNo = '')
     {
-        $sql = "SELECT logistic_no, warehouse_code, logistic_id, province, city, district FROM `delivery_order` WHERE  1 ";
+        $warehouseList = [];
+        $logisticIdList = [];
+        $logisticCompanyTimelinessSql = "SELECT * FROM logistic_company_timeliness WHERE status = "  . LogisticCompanyTimeliness::STATUS_NORMAL . "  ";
+        $logisticCompanyTimelinessResult = \Yii::$app->db->createCommand($logisticCompanyTimelinessSql)->queryAll();
+        foreach ($logisticCompanyTimelinessResult as $value) {
+            $warehouseList[] = $value['warehouse_code'];
+            $logisticIdList[] = $value['logistic_id'];
+        }
+
+        $warehouseList = array_unique($warehouseList);
+        $logisticIdList = array_unique($logisticIdList);
+        $warehouseStr = "'" . implode("','", $warehouseList) . "'";
+        $logisticIdStr = "'" . implode("','", $logisticIdList) . "'";
+        $sql = "SELECT logistic_no, warehouse_code, logistic_id, province, city, district FROM `delivery_order` WHERE  warehouse_code in (" . $warehouseStr . ") AND logistic_id in (" . $logisticIdStr . ")   ";
+
 
         if (!empty($logisticNo)) {
             $sql .= " AND logistic_no = '" . $logisticNo . "' ";
@@ -580,7 +594,6 @@ logistic_no, ((CASE WHEN(
             }
         }
         echo "sql:" . $sql . "\r\n";
-        exit;
         $result = \Yii::$app->db->createCommand($sql)->queryAll();
         if (empty($result)) {
             echo "没有符合的记录。";
