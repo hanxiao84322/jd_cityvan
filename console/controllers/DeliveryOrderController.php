@@ -602,7 +602,6 @@ logistic_no, ((CASE WHEN(
         echo "有:" . count($result) . "条数据需要处理\r\n";
         foreach ($result as $deliveryOrder) {
             try {
-
                 $logisticCompanyTimeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($deliveryOrder['warehouse_code'], $deliveryOrder['logistic_id'], $deliveryOrder['province'], $deliveryOrder['city'], $deliveryOrder['district']);
                 if ($logisticCompanyTimeliness) {
                     DeliveryOrder::updateAll(['timeliness' => $logisticCompanyTimeliness], ['logistic_no' => $deliveryOrder['logistic_no']]);

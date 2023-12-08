@@ -11,7 +11,7 @@ class LogisticCompanyTimelinessController extends Controller
 {
     /**
      *
-     * ./yii logistic-company-timeliness/run '2023-12-04' '' '' ''
+     * ./yii logistic-company-timeliness/run '2023-12-04' '' '' '1231441306732'
      *
      * @param string $startTime
      * @param string $endTime
@@ -25,7 +25,7 @@ class LogisticCompanyTimelinessController extends Controller
     logistic_id,
     SUM(
         CASE WHEN(
-            TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) < 24 THEN '1' ELSE '0'
+            24 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) <= 0 THEN '1' ELSE '0'
         END
     )
  AS less_one_day,
@@ -78,6 +78,7 @@ FROM
             }
         }
         $sql .= " GROUP BY warehouse_code, logistic_id";
+        echo "sql:" . $sql . "\r\n";
         $result = \Yii::$app->db->createCommand($sql)->queryAll();
         if (empty($result)) {
             echo "没有符合的记录。";
