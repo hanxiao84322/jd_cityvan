@@ -1112,4 +1112,123 @@ class DeliveryOrderSearch extends DeliveryOrder
         return $dataProvider;
     }
 
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchWaitSettlementWarning($params)
+    {
+        $query = DeliveryOrder::find()->select("do.*,lc.company_name as logistic_company_name, DATEDIFF(CURDATE(), do.`create_time`) AS days")->alias('do')->leftJoin(LogisticCompany::tableName() . ' lc', 'do.logistic_id = lc.id');
+
+        $this->load($params);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => $this->page_size,
+            ],
+        ]);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+//        if (!empty($dataPower)) {
+//            if (isset($dataPower['warehouseCodes'])) {
+//                $query->andFilterWhere(['in', 'do.warehouse_code', json_decode(trim($dataPower['warehouseCodes']), true)]);
+//            } elseif (isset($dataPower['logisticIds'])) {
+//                $query->andFilterWhere(['in', 'do.logistic_id', json_decode($dataPower['logisticIds'], true)]);
+//            }
+//        } else {
+//            $query->andFilterWhere([
+//                'do.warehouse_code' => $this->warehouse_code
+//            ]);
+//        }
+
+//        $dataProvider = self::getQuery($query, $this->status, $this->order_no, $this->time_type, $this->create_time_start, $this->create_time_end);
+        $query->andFilterWhere(['>=', 'do.create_time', '2023-10-01']);
+        $query->andFilterWhere(['is_logistic_company_settle' => DeliveryOrder::NOT]);
+        $query->andFilterWhere(['>=', 'DATEDIFF(CURDATE(), do.`create_time`)', 60]);
+        $query->andFilterWhere([
+            'do.status' => $this->status,
+            'do.logistic_id' => $this->logistic_id,
+            'do.receiver_phone' => $this->receiver_phone,
+            'do.is_deduction' => $this->is_deduction,
+        ]);
+
+        if (!empty($this->logistic_no)) {
+            $logisticNos = Utility::getInputData($this->logistic_no);
+            $query->andFilterWhere(['in', 'do.logistic_no', $logisticNos]);
+        }
+        if (!empty($this->order_no)) {
+            $orderNos = Utility::getInputData($this->order_no);
+            $query->andFilterWhere(['in', 'do.order_no', $orderNos]);
+        }
+        if (!empty($this->time_type)) {
+            if (empty($this->create_time_start)) {
+                $this->create_time_start = date('Y-m-d 00:00:00', strtotime('-30 day'));
+            }
+            if (empty($this->create_time_end)) {
+                $this->create_time_end = date('Y-m-d 23:59:59', time());
+            }
+
+            switch ($this->time_type) {
+                case 'send_time':
+                    $query->andWhere(['>=', 'do.send_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.send_time', $this->create_time_end]);
+                    break;
+                case 'receive_time':
+                    $query->andWhere(['>=', 'do.receive_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.receive_time', $this->create_time_end]);
+                    break;
+                case 'package_collection_time':
+                    $query->andWhere(['>=', 'do.package_collection_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.package_collection_time', $this->create_time_end]);
+                    break;
+                case 'transporting_time':
+                    $query->andWhere(['>=', 'do.transporting_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.transporting_time', $this->create_time_end]);
+                    break;
+                case 'transported_time':
+                    $query->andWhere(['>=', 'do.transported_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.transported_time', $this->create_time_end]);
+                    break;
+                case 'delivering_time':
+                    $query->andWhere(['>=', 'do.delivering_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.delivering_time', $this->create_time_end]);
+                    break;
+                case 'delivered_time':
+                    $query->andWhere(['>=', 'do.delivered_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.delivered_time', $this->create_time_end]);
+                    break;
+                case 'allocation_time':
+                    $query->andWhere(['>=', 'do.allocation_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.allocation_time', $this->create_time_end]);
+                    break;
+                case 'reject_time':
+                    $query->andWhere(['>=', 'do.reject_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.reject_time', $this->create_time_end]);
+                    break;
+                case 'estimate_time':
+                    $query->andWhere(['>=', 'do.estimate_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.estimate_time', $this->create_time_end]);
+                    break;
+                case 'create_time':
+                    $query->andWhere(['>=', 'do.create_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.create_time', $this->create_time_end]);
+                    break;
+                default :
+                    $query->andWhere(['>=', 'do.create_time', $this->create_time_start]);
+                    $query->andWhere(['<=', 'do.create_time', $this->create_time_end]);
+                    break;
+            }
+        }
+        $query->orderBy('DATEDIFF(CURDATE(), do.`create_time`) DESC');
+//                echo $query->createCommand()->getRawSql();exit;
+
+        return $dataProvider;
+    }
+
 }

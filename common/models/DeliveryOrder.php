@@ -102,7 +102,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
 
 
     public $create_month;
-
+    public $days;
 
     const YES = 1;
     const NOT = 0;

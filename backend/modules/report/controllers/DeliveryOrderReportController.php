@@ -363,4 +363,23 @@ class DeliveryOrderReportController extends Controller
         ]);
     }
 
+    public function actionWaitSettlementWarning()
+    {
+        $params = $this->request->queryParams;
+        $params['DeliveryOrderSearch']['is_logistic_company_settle'] = DeliveryOrder::NOT;
+        $searchModel = new DeliveryOrderSearch();
+        $dataProvider = $searchModel->searchWaitSettlementWarning($params, 1);
+        $pages = new Pagination(
+            [
+                'totalCount' => isset($dataProvider->totalCount) ? $dataProvider->totalCount : 0,
+                'pageSize' => $searchModel->page_size,
+            ]
+        );
+        return $this->render('wait-settlement-warning', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'pages' => $pages,
+        ]);
+    }
+
 }
