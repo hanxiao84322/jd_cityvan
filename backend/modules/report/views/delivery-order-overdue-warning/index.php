@@ -27,49 +27,61 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => ['class' => 'hidden']//关闭分页
         ],
         'columns' => [
-            'date',
+            [
+                'header' => '统计日期',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    return $model->date;
+                }
+            ],
             'warehouse_code',
-            'logistic_company_name',
+            [
+                'label' => '快递公司',
+                'value' =>
+                    function ($model) {
+                        return \common\models\LogisticCompany::getNameById($model->logistic_id);
+                    },
+            ],
             [
                 'header' => '超期1天内',
                 'format' => 'raw',
-                'value' => function ($model) use ($create_time_end, $create_time_start) {
-                    return \yii\helpers\Html::a($model->less_one_day, 'items?type=1&create_time_start=' . $create_time_start . '&create_time_end=' . $create_time_end . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
+                'value' => function ($model) {
+                    return \yii\helpers\Html::a($model->less_one_day, 'items?type=1&create_time_start=' . $model->date . '&create_time_end=' . $model->date . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
                 }
             ],
             [
                 'header' => '超期1-2天',
                 'format' => 'raw',
-                'value' => function ($model) use ($create_time_end, $create_time_start) {
-                    return \yii\helpers\Html::a($model->one_to_two_day, 'items?type=2&create_time_start=' . $create_time_start . '&create_time_end=' . $create_time_end . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
+                'value' => function ($model) {
+                    return \yii\helpers\Html::a($model->one_to_two_day, 'items?type=2&create_time_start=' . $model->date . '&create_time_end=' . $model->date . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
                 }
             ],
             [
                 'header' => '超期2-3天',
                 'format' => 'raw',
-                'value' => function ($model) use ($create_time_end, $create_time_start) {
-                    return \yii\helpers\Html::a($model->two_to_three_day, 'items?type=3&create_time_start=' . $create_time_start . '&create_time_end=' . $create_time_end . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
+                'value' => function ($model) {
+                    return \yii\helpers\Html::a($model->two_to_three_day, 'items?type=3&create_time_start=' . $model->date . '&create_time_end=' . $model->date . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
                 }
             ],
             [
                 'header' => '超期3-5天',
                 'format' => 'raw',
-                'value' => function ($model) use ($create_time_end, $create_time_start) {
-                    return \yii\helpers\Html::a($model->three_to_five_day, 'items?type=4&create_time_start=' . $create_time_start . '&create_time_end=' . $create_time_end . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
+                'value' => function ($model) {
+                    return \yii\helpers\Html::a($model->three_to_five_day, 'items?type=4&create_time_start=' . $model->date . '&create_time_end=' . $model->date . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
                 }
             ],
             [
                 'header' => '超期5-7天',
                 'format' => 'raw',
-                'value' => function ($model) use ($create_time_end, $create_time_start) {
-                    return \yii\helpers\Html::a($model->five_to_seven_day, 'items?type=5&create_time_start=' . $create_time_start . '&create_time_end=' . $create_time_end . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
+                'value' => function ($model) {
+                    return \yii\helpers\Html::a($model->five_to_seven_day, 'items?type=5&create_time_start=' . $model->date . '&create_time_end=' . $model->date . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
                 }
             ],
             [
                 'header' => '7天以上严重超期',
                 'format' => 'raw',
-                'value' => function ($model) use ($create_time_end, $create_time_start) {
-                    return \yii\helpers\Html::a($model->more_seven_day, 'items?type=6&create_time_start=' . $create_time_start . '&create_time_end=' . $create_time_end . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
+                'value' => function ($model) {
+                    return \yii\helpers\Html::a($model->more_seven_day, 'items?type=6&create_time_start=' . $model->date . '&create_time_end=' . $model->date . '&warehouse_code=' . $model->warehouse_code . '&logistic_id=' . $model->logistic_id, ['target' => '_blank']);
                 }
             ],
         ],

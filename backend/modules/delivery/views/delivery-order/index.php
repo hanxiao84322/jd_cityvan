@@ -92,8 +92,30 @@ $this->params['breadcrumbs'][] = $this->title;
                     'replace_delivered_time',
                     'reject_time',
                     'reject_in_warehouse_time',
-//                    'order_total_price',
-//                    'total_price',
+                    [
+                        'header' => '是否与快递公司结算',
+                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) ? 1 : 0,
+                        'format' => 'raw',
+                        'value' => function ($model) {
+                            return DeliveryOrder::getYesOrNotName($model->is_logistic_company_settle);
+                        }
+                    ],
+                    [
+                        'header' => '支付快递公司金额',
+                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) ? 1 : 0,
+                        'format' => 'raw',
+                        'value' => function ($model) {
+                            return $model->order_total_price;
+                        }
+                    ],
+                    [
+                        'header' => '收取京东金额',
+                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) ? 1 : 0,
+                        'format' => 'raw',
+                        'value' => function ($model) {
+                            return $model->total_price;
+                        }
+                    ],
                     'update_name',
                     'update_time',
                     [

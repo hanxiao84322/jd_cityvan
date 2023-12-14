@@ -22,7 +22,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         return \common\models\LogisticCompany::getNameById($model->logistic_id);
                     },
             ],
-
             [
                 'attribute' => 'province',
                 'value' =>

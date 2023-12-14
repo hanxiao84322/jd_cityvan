@@ -23,7 +23,7 @@ use kartik\datetime\DateTimePicker;
         <?php if (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) {?>
             <?= $form->field($model, 'warehouse_code', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Warehouse::getAll(), 'code', 'name'), ['prompt' => '---全选---'])->label('仓库'); ?>
 
-            <?= $form->field($model, 'logistic_id', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\LogisticCompany::getAll(), 'id', 'company_name'), ['prompt' => '---全选---'])->label('物流公司'); ?>
+            <?= $form->field($model, 'logistic_id', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\LogisticCompany::getAll(), 'id', 'company_name'), ['prompt' => '---全选---'])->label('快递公司'); ?>
         <?php }?>
     </div>
 
@@ -103,6 +103,7 @@ Modal::end();
             const fileInput = $('#file_input').get(0);
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
+            formData.append('type', <?php echo \common\models\DeliveryOrderTask::TYPE_ORDER;?>);
             $.ajax({
                 url: '/delivery/delivery-order-task/ajax-create',
                 cache: false,

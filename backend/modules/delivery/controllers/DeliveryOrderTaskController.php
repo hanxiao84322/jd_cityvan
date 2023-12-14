@@ -120,8 +120,10 @@ class DeliveryOrderTaskController extends Controller
         $model = new DeliveryOrderTask();
         $post = $this->request->post();
         $post['DeliveryOrderTask']['file_path'] = $filePath;
+        $post['DeliveryOrderTask']['type'] = $post['type'];
         $post['DeliveryOrderTask']['apply_time'] = date('Y-m-d H:i:s', time());
         $post['DeliveryOrderTask']['apply_username'] = \Yii::$app->user->getIdentity()['username'];
+        unset($post['type']);
         if ($model->load($post) && $model->save()) {
             $return['status'] = 1;
             $return['msg'] = '文件已经成功上传，请稍后转至任务列表查看进度。';

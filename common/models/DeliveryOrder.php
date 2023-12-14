@@ -60,8 +60,8 @@ use common\components\Utility;
  * @property int|null $is_unusual 疑似异常 0 否 1 是
  * @property int $is_deduction 是否存在扣款 0 否 1 是
  * @property string|null $truck_classes_no 卡车班次
- * @property float|null $order_total_price 订单总金额
- * @property float|null $total_price 应付总金额（订单总金额减去折扣加上运费）
+ * @property float|null $order_total_price 支付快递公司金额
+ * @property float|null $total_price 收取京东金额
  * @property string|null $create_name 创建人用户名
  * @property string|null $create_time 创建时间
  * @property string|null $update_name 更新人用户名
@@ -91,6 +91,15 @@ class DeliveryOrder extends \yii\db\ActiveRecord
     public $retention_seven_days;
     public $retention_ten_days;
     public $retention_more_ten_days;
+
+    public $less_one_day;
+    public $date;
+    public $one_to_two_day;
+    public $two_to_three_day;
+    public $three_to_five_day;
+    public $five_to_seven_day;
+    public $more_seven_day;
+
 
     public $create_month;
 
@@ -243,8 +252,8 @@ class DeliveryOrder extends \yii\db\ActiveRecord
             'is_unusual' => '疑似异常',
             'is_deduction' => '是否存在扣款',
             'truck_classes_no' => '卡车批次号',
-            'order_total_price' => '订单总金额',
-            'total_price' => '订单实付金额',
+            'order_total_price' => '支付快递公司金额',
+            'total_price' => '收取京东金额',
             'create_name' => '创建人用户名',
             'create_time' => '创建时间',
             'update_name' => '更新人用户名',
@@ -394,8 +403,10 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                 $addressResult = \Yii::$app->db->createCommand($addressSql)->queryOne();
                 if (!empty($addressResult)) {
                     $district = $addressResult['name'];
-                    $city = Cnarea::getParentNameByName($district);
-                    $province = Cnarea::getParentNameByName($city);
+
+                    $city = Cnarea::getParentNameByName($district, Cnarea::LEVEL_THREE);
+                    echo $city;exit;
+                    $province = Cnarea::getParentNameByName($city, Cnarea::LEVEL_TWO);
                     $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
                 }
                 $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo])->exists();

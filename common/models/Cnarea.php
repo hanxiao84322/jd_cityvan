@@ -116,10 +116,11 @@ class Cnarea extends \yii\db\ActiveRecord
 
     }
 
-    public static function getParentNameByName($areaName)
+    public static function getParentNameByName($areaName, $level)
     {
+
         $parentName = '';
-        $parentCode = self::find()->select('parent_code')->where(['name' => $areaName])->scalar();
+        $parentCode = self::find()->select('parent_code')->where(['name' => $areaName, 'level' => $level])->andWhere('merger_name like "%四川%" or merger_name like "%青海%" or merger_name like "%西藏%" or merger_name like "%甘肃%"')->scalar();
         if (!empty($parentCode)) {
             $parentName = self::find()->select('name')->where(['area_code' => $parentCode])->scalar();
         }

@@ -56,7 +56,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'receiver_phone',
                     'receiver_address',
                     'send_time',
-                    'package_collection_time',
                     'transporting_time',
                     'transported_time',
                     'delivering_time',

@@ -25,31 +25,31 @@ class LogisticCompanyTimelinessController extends Controller
     logistic_id,
     SUM(
         CASE WHEN(
-            24 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) <= 0 THEN '1' ELSE '0'
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 0) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 24))) THEN '1' ELSE '0'
         END
     )
  AS less_one_day,
    SUM(
         CASE WHEN(
-           48 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) >= 24 THEN '1' ELSE '0'
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 24) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 48))) THEN '1' ELSE '0'
         END
     )
  AS one_to_two_day,
    SUM(
         CASE WHEN(
-           72 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) >= 48 THEN '1' ELSE '0'
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 48) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 72))) THEN '1' ELSE '0'
         END
     )
  AS two_to_three_day,
    SUM(
         CASE WHEN(
-           120 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) >= 72 THEN '1' ELSE '0'
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 72) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 120))) THEN '1' ELSE '0'
         END
     )
  AS three_to_five_day,
    SUM(
         CASE WHEN(
-           148 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) >= 120 THEN '1' ELSE '0'
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 120) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 148))) THEN '1' ELSE '0'
         END
     )
  AS five_to_seven_day,
@@ -60,7 +60,7 @@ class LogisticCompanyTimelinessController extends Controller
     )
  AS more_seven_day
 FROM
-    `delivery_order` WHERE status NOT IN(" . DeliveryOrder::STATUS_DELIVERED . ", " .DeliveryOrder::STATUS_REPLACE_DELIVERED . ", " .DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE . ") AND timeliness > 0 ";
+    `delivery_order` WHERE status NOT IN(" . DeliveryOrder::STATUS_DELIVERED . ", " .DeliveryOrder::STATUS_REPLACE_DELIVERED . ", " . DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE . ") AND timeliness > 0 ";
         if (!empty($logisticNo)) {
             $sql .= " AND logistic_no = '" . $logisticNo . "' ";
         } else {

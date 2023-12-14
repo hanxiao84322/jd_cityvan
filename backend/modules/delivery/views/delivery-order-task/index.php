@@ -31,6 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'columns' => [
                     [
+                        'header' => '类型',
+                        'value' => function ($model) {
+                            return DeliveryOrderTask::getTypeName($model->type);
+                        }
+                    ],
+                    [
                         'header' => '状态',
                         'headerOptions' => [
                             'style' => 'text-align:center;'

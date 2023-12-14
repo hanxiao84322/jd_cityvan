@@ -8,6 +8,8 @@ use common\components\Utility;
 use common\models\Customer;
 use common\models\DeliveryOrder;
 use common\models\DeliveryOrderTask;
+use common\models\LogisticCompanyCheckBill;
+use common\models\LogisticCompanyCheckBillDetail;
 use yii\console\Controller;
 use yii\helpers\Json;
 
@@ -23,7 +25,7 @@ class DeliveryOrderTaskController extends Controller
             'msg' => '',
             'return' => []
         ];
-        $taskList = DeliveryOrderTask::find()->where(['status' => DeliveryOrderTask::STATUS_WAIT_UPDATE])->asArray()->all();
+        $taskList = DeliveryOrderTask::find()->where(['status' => DeliveryOrderTask::STATUS_WAIT_UPDATE, 'id' => 328])->asArray()->all();
         if (empty($taskList)) {
             echo "没有待处理的数据。";
             exit;
@@ -51,7 +53,11 @@ class DeliveryOrderTaskController extends Controller
                 if (!$taskModel->save()) {
                     throw new \Exception(Utility::arrayToString($taskModel->getErrors()));
                 }
-                $return = DeliveryOrder::batchUpdate($excelData, 'system');
+                if ($task['type'] == DeliveryOrderTask::TYPE_ORDER) {
+                    $return = DeliveryOrder::batchUpdate($excelData, 'system');
+                } elseif ($task['type'] == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
+                    $return = LogisticCompanyCheckBillDetail::batchUpdate($excelData, 'system');
+                }
                 $return['errorList'] = !empty($return['errorList']) ? join("|", $return['errorList']) : '';
                 $ret['success'] = 1;
                 $ret['return'] = $return;

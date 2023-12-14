@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var common\models\AdjustOrder $model */
 
-$this->title = '查看单详情';
+$this->title = '查看调整单详情';
 $this->params['breadcrumbs'][] = ['label' => '调整单列表', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);

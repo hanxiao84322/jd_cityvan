@@ -10,6 +10,7 @@ use Yii;
  *
  * @property int $id 自增ID
  * @property string|null $file_path 文件路径
+ * @property int|null $type 类型 1 订单 2 对账单 ...
  * @property int|null $status 执行状态 0 未执行 1 执行中 2 执行完成
  * @property string|null $result 结果
  * @property string|null $apply_username 提交人用户名
@@ -27,6 +28,13 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
         self::STATUS_UPDATING => '执行中',
         self::STATUS_UPDATED => '执行完成',
     ];
+
+    const TYPE_ORDER = 1;
+    const TYPE_LOGISTIC_COMPANY_CHECK_BILL = 2;
+    static $typeList = [
+        self::TYPE_ORDER => '订单',
+        self::TYPE_LOGISTIC_COMPANY_CHECK_BILL => '对账单',
+    ];
     /**
      * {@inheritdoc}
      */
@@ -41,7 +49,7 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['status'], 'integer'],
+            [['status', 'type'], 'integer'],
             [['file_path', 'result'], 'string'],
             [['apply_time', 'start_time', 'end_time'], 'safe'],
             [['apply_username'], 'string', 'max' => 50],
@@ -55,8 +63,9 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'file_path' => 'File Url',
-            'status' => 'Status',
+            'file_path' => '文件路径',
+            'status' => '状态',
+            'type' => '类型',
             'result' => '执行结果',
             'apply_username' => '申请人用户名',
             'apply_time' => '申请时间',
@@ -70,10 +79,18 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
         return isset(self::$statusList[$status]) ? self::$statusList[$status] : '无';
     }
 
+    public static function getTypeName($type)
+    {
+        return isset(self::$typeList[$type]) ? self::$typeList[$type] : '无';
+    }
+
     public static function reRun($id)
     {
         $model = self::findOne($id);
         $model->status = self::STATUS_WAIT_UPDATE;
+        $model->result = '';
+        $model->start_time = '';
+        $model->end_time = '';
         $model->save();
         return true;
     }

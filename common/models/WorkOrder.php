@@ -14,7 +14,7 @@ use Yii;
  * @property string $order_no 订单号
  * @property string $shipping_no 包裹号
  * @property string $warehouse_code 仓库编码
- * @property int $logistic_id 物流公司ID
+ * @property int $logistic_id 快递公司ID
  * @property int $type 工单类型
  * @property int $priority  优先级 1 低 2 中 3 高
  * @property string|null $receive_name 客户姓名

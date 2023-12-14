@@ -46,46 +46,80 @@ class DeliveryOrderOverdueWarningSearch extends DeliveryOrderOverdueWarning
      */
     public function search($params, $dataPower = [])
     {
-        $query = DeliveryOrderOverdueWarning::find()->select('doow.*, lc.company_name as logistic_company_name')->alias('doow')->leftJoin(LogisticCompany::tableName() . ' lc', 'doow.logistic_id = lc.id');
+        $sql = "SELECT
+    warehouse_code,
+    logistic_id,DATE(create_time) as date,
+    SUM(
+        CASE WHEN(
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 0) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 24))) THEN '1' ELSE '0'
+        END
+    )
+ AS less_one_day,
+   SUM(
+        CASE WHEN(
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 24) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 48))) THEN '1' ELSE '0'
+        END
+    )
+ AS one_to_two_day,
+   SUM(
+        CASE WHEN(
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 48) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 72))) THEN '1' ELSE '0'
+        END
+    )
+ AS two_to_three_day,
+   SUM(
+        CASE WHEN(
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 72) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 120))) THEN '1' ELSE '0'
+        END
+    )
+ AS three_to_five_day,
+   SUM(
+        CASE WHEN(
+            ((TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 120) AND (TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) < 148))) THEN '1' ELSE '0'
+        END
+    )
+ AS five_to_seven_day,
+   SUM(
+        CASE WHEN(
+           TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24)) >= 148 THEN '1' ELSE '0'
+        END
+    )
+ AS more_seven_day
+FROM
+    `delivery_order` WHERE status NOT IN(" . DeliveryOrder::STATUS_DELIVERED . ", " .DeliveryOrder::STATUS_REPLACE_DELIVERED . ", " . DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE . ") AND timeliness > 0 ";
 
-        // add conditions that should always apply here
+        $this->load($params);
+
+        if (!empty($dataPower)) {
+            if (isset($dataPower['warehouseCodes'])) {
+                $sql .= " AND warehouse_code IN  （'" . implode("','", json_decode(trim($dataPower['warehouseCodes']), true)) . "') ";
+            } elseif (isset($dataPower['logisticIds'])) {
+                $sql .= " AND logistic_id IN  （'" . implode("','", json_decode(trim($dataPower['logisticIds']), true)) . "') ";
+            }
+        }
+
+        if (empty($this->create_time_start)) {
+            $this->create_time_start = date('Y-m-d 00:00:00', strtotime('-1 day'));
+        }
+        $sql .= " AND create_time >= '" . $this->create_time_start . "' ";
+
+        if (empty($this->create_time_end)) {
+            $this->create_time_end = date('Y-m-d 23:59:59', strtotime('-1 day'));
+        }
+        $sql .= " AND create_time <= '" . $this->create_time_end . "' ";
+        if (!empty($this->logistic_id)) {
+            $sql .= " AND logistic_id <= '" . $this->logistic_id . "' ";
+        }
+        if (!empty($this->warehouse_code)) {
+            $sql .= " AND warehouse_code <= '" . $this->warehouse_code . "' ";
+        }
+        $sql .= " GROUP BY DATE(create_time), warehouse_code, logistic_id ";
+        $query = DeliveryOrder::findBySql($sql);
+//                echo $query->createCommand()->getRawSql();exit;
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
-
-        $this->load($params);
-
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
-
-
-            if (!empty($dataPower)) {
-                if (isset($dataPower['warehouseCodes'])) {
-                    $query->andFilterWhere(['in', 'warehouse_code', json_decode(trim($dataPower['warehouseCodes']), true)]);
-                } elseif (isset($dataPower['logisticIds'])) {
-                    $query->andFilterWhere(['in', 'logistic_id', json_decode($dataPower['logisticIds'], true)]);
-                }
-            }
-        if (empty($this->create_time_start)) {
-            $this->create_time_start = date('Y-m-d', strtotime('-1 day'));
-        }
-        $query->andWhere(['>=', 'date', $this->create_time_start]);
-
-        if (empty($this->create_time_end)) {
-            $this->create_time_end = date('Y-m-d', strtotime('-1 day'));
-        }
-        $query->andWhere(['<=', 'date', $this->create_time_end]);
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'logistic_id' => $this->logistic_id,
-            'warehouse_code' => $this->warehouse_code,
-        ]);
-
         return $dataProvider;
     }
 
@@ -107,34 +141,35 @@ class DeliveryOrderOverdueWarningSearch extends DeliveryOrderOverdueWarning
         $query->andFilterWhere(['warehouse_code' => $warehouseCode]);
         $query->andFilterWhere(['logistic_id' => $logisticId]);
 
-        $query->andWhere(['not in', 'do.status', [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED]]);
+        $query->andWhere(['not in', 'do.status', [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED, DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE]]);
         $query->andWhere(['>', 'do.timeliness', '0']);
 
 
         switch ($type) {
             case '1': //运输即将超时
-                $query->andWhere('TIMESTAMPDIFF(HOUR, do.send_time, NOW()) -(do.timeliness * 24) < 24');
+                $query->andWhere('(TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) >= 0) AND (TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) < 24)');
                 break;
             case '2': //超时运输结束
-                $query->andWhere('48 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 24');
+                $query->andWhere('(TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) >= 24) AND (TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) < 48)');
 
                 break;
             case '3': //无运输结束
-                $query->andWhere('72 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 48');
+                $query->andWhere('(TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 48) >= 24) AND (TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) < 72)');
                 break;
             case '4': //超时配送中
-                $query->andWhere('120 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 72');
+                $query->andWhere('(TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 48) >= 72) AND (TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) < 120)');
                 break;
             case '5': //无配送中
-                $query->andWhere('148 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 120');
+                $query->andWhere('(TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 48) >= 120) AND (TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) < 148 )');
                 break;
             case '6': //无配送中
-                $query->andWhere('TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 148');
+                $query->andWhere('TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(timeliness * 24) >= 148');
                 break;
             default :
                 break;
         }
 
+//                echo $query->createCommand()->getRawSql();exit;
 
         return $dataProvider;
     }
@@ -163,23 +198,23 @@ class DeliveryOrderOverdueWarningSearch extends DeliveryOrderOverdueWarning
 
         switch ($type) {
             case '1': //运输即将超时
-                $query->andWhere('TIMESTAMPDIFF(HOUR, do.send_time, NOW()) -(do.timeliness * 24) < 24');
+                $query->andWhere('TIMESTAMPDIFF(HOUR, do.send_time, NOW())-(do.timeliness * 24) < 24');
                 break;
             case '2': //超时运输结束
-                $query->andWhere('48 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 24');
+                $query->andWhere('48 > TIMESTAMPDIFF(HOUR, send_time, NOW())-(timeliness * 24) >= 24');
 
                 break;
             case '3': //无运输结束
-                $query->andWhere('72 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 48');
+                $query->andWhere('72 > TIMESTAMPDIFF(HOUR, send_time, NOW())-(timeliness * 24) >= 48');
                 break;
             case '4': //超时配送中
-                $query->andWhere('120 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 72');
+                $query->andWhere('120 > TIMESTAMPDIFF(HOUR, send_time, NOW())-(timeliness * 24) >= 72');
                 break;
             case '5': //无配送中
-                $query->andWhere('148 > TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 120');
+                $query->andWhere('148 > TIMESTAMPDIFF(HOUR, send_time, NOW())-(timeliness * 24) >= 120');
                 break;
             case '6': //无配送中
-                $query->andWhere('TIMESTAMPDIFF(HOUR, send_time, NOW()) -(timeliness * 24) >= 148');
+                $query->andWhere('TIMESTAMPDIFF(HOUR, send_time, NOW())-(timeliness * 24) >= 148');
                 break;
             default :
                 break;
