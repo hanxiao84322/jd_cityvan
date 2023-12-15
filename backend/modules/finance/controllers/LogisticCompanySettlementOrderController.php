@@ -261,7 +261,7 @@ class LogisticCompanySettlementOrderController extends Controller
         $model= $this->findModel($id);
         $model->status = LogisticCompanySettlementOrder::STATUS_PAID;
         $model->save();
-        $deliveryOrderList = LogisticCompanyCheckBillDetail::find()->select("logistic_no")->where(['logistic_company_check_bill_no' => $model->logistic_company_check_bill_no])->column();
+        $deliveryOrderList = LogisticCompanyCheckBillDetail::find()->select("logistic_no")->where(['logistic_company_check_bill_no' => $model->logistic_company_check_bill_no, 'status' => [LogisticCompanyCheckBillDetail::STATUS_PRICE_DIFF,LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF,LogisticCompanyCheckBillDetail::STATUS_SAME ]])->column();
         DeliveryOrder::updateAll(['is_logistic_company_settle' => DeliveryOrder::YES], ['logistic_no' => $deliveryOrderList]);
         \Yii::$app->session->setFlash('success', '结算单已完成!');
         return $this->redirect(['index']);

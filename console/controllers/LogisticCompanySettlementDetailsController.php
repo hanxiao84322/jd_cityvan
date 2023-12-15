@@ -46,7 +46,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                 if (empty($endTime)) {
                     $endTime = date('Y-m-d 23:59:59', strtotime('-1 day'));
                 }
-                $deliveryOrderSql = "SELECT * FROM delivery_order where finish_time >= '" . $startTime . "' AND finish_time <= '" . $endTime . "' and logistic_id = '" . $item['logistic_id'] . "'  AND status in (" . DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE . "," . DeliveryOrder::STATUS_DELIVERED . "," . DeliveryOrder::STATUS_REPLACE_DELIVERED . ") AND is_logistic_company_settle = 0 ";
+                    $deliveryOrderSql = "SELECT * FROM delivery_order where finish_time >= '" . $startTime . "' AND finish_time <= '" . $endTime . "' and logistic_id = '" . $item['logistic_id'] . "'  AND status in (" . DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE . "," . DeliveryOrder::STATUS_DELIVERED . "," . DeliveryOrder::STATUS_REPLACE_DELIVERED . ") AND is_logistic_company_settle = 0 ";
                 if (!empty($logisticNo)) {
                     $deliveryOrderSql .= " AND logistic_no = '" . $logisticNo . "' ";
                 }

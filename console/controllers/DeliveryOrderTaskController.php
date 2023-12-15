@@ -25,7 +25,7 @@ class DeliveryOrderTaskController extends Controller
             'msg' => '',
             'return' => []
         ];
-        $taskList = DeliveryOrderTask::find()->where(['status' => DeliveryOrderTask::STATUS_WAIT_UPDATE, 'id' => 328])->asArray()->all();
+        $taskList = DeliveryOrderTask::find()->where(['status' => DeliveryOrderTask::STATUS_WAIT_UPDATE])->asArray()->all();
         if (empty($taskList)) {
             echo "没有待处理的数据。";
             exit;
