@@ -405,7 +405,6 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                     $district = $addressResult['name'];
 
                     $city = Cnarea::getParentNameByName($district, Cnarea::LEVEL_THREE);
-                    echo $city;exit;
                     $province = Cnarea::getParentNameByName($city, Cnarea::LEVEL_TWO);
                     $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
                 }
