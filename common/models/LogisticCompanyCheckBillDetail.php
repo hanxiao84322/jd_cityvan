@@ -90,7 +90,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function batchUpdate($excelData, $username)
+    public static function batchUpdate($excelData, $type, $username)
     {
         $return = [
             'successCount' => 0,
@@ -120,10 +120,11 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                     throw new \Exception('不存在的仓库编码:' . $warehouseCode);
                 }
                 $status = LogisticCompanyCheckBillDetail::STATUS_SAME;
-                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo]);
+                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo, 'logistic_id' => $logisticId]);
                 if (!$deliveryOrderModel) {
                     $status = LogisticCompanyCheckBillDetail::STATUS_NOT_FOUND;
                 }
+
                 if (!in_array($deliveryOrderModel->status, [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED, DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE])) {
                     $note .= "订单状态是" . DeliveryOrder::getStatusName($deliveryOrderModel->status) . "未达到最终状态！\r\n";
                 }
@@ -220,7 +221,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                                 $logisticCompanyCheckBillModel->create_username = $username;
                                 $logisticCompanyCheckBillModel->create_time = date('Y-m-d H:i:s', time());
                                 $logisticCompanyCheckBillModel->status = LogisticCompanyCheckBill::STATUS_NEW;
-                                $logisticCompanyCheckBillModel->type = LogisticCompanyCheckBill::TYPE_PAY;
+                                $logisticCompanyCheckBillModel->type = $type;
                                 if (!$logisticCompanyCheckBillModel->save()) {
                                     throw new \Exception(Utility::arrayToString($logisticCompanyCheckBillModel->getErrors()));
                                 }

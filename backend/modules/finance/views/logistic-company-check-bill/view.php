@@ -39,6 +39,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
             ],
             'warehouse_code',
+            [
+                'attribute' => 'type',
+                'value' => function ($model) {
+                    return \common\models\LogisticCompanyCheckBill::getTypeName($model->type);
+                }
+            ],
             'date',
             [
                 'attribute' => 'status',

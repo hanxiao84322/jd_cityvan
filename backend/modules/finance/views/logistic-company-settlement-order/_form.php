@@ -25,6 +25,12 @@ use yii\widgets\ActiveForm;
                             },
                     ],
                     'warehouse_code',
+                    [
+                        'attribute' => 'type',
+                        'value' => function ($model) {
+                            return \common\models\LogisticCompanyCheckBill::getTypeName($model->type);
+                        }
+                    ],
                     'date',
                     [
                         'attribute' => 'status',
@@ -76,6 +82,9 @@ use yii\widgets\ActiveForm;
             <?php $form = ActiveForm::begin(); ?>
             <div class="row">
                 <?= $form->field($model, 'settlement_order_no', ['options' => ['class' => 'col-xs-3']])->textInput(['readonly' => 'readonly']); ?>
+            </div>
+            <div class="row">
+                <?= $form->field($model, 'type', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanySettlementOrder::$typeList, ['disabled' => 'disabled']); ?>
             </div>
             <div class="row">
                 <?= $form->field($model, 'order_num', ['options' => ['class' => 'col-xs-3']])->textInput(); ?>

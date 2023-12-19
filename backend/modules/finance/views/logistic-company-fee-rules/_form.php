@@ -13,7 +13,9 @@ use yii\widgets\ActiveForm;
 <div class="logistic-company-fee-rules-form">
 
     <?php $form = ActiveForm::begin(); ?>
-
+    <div class="row">
+        <?= $form->field($model, 'type', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$typeList)->label('类型'); ?>
+    </div>
     <div class="row">
         <?= $form->field($model, 'logistic_id', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\LogisticCompany::getAll(), 'id', 'company_name'), ['prompt' => '---全选---'])->label('快递公司'); ?>
     </div>

@@ -53,13 +53,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'class' => 'yii\grid\ActionColumn',
                         'header' => '操作',
-                        'template' => '{view} {details}  {print} {delete} {create_settlement}',
+                        'template' => '{view} {details} {update} {print} {delete} {create_settlement}',
                         'buttons' => [
                             'view' => function ($url, $model) {
                                 return Html::a('查看', 'view?id=' . $model->id, ['target' => '_blank']);
                             },
                             'details' => function ($url, $model) {
                                 return Html::a('对账明细', ['/finance/logistic-company-check-bill-detail/index', 'LogisticCompanyCheckBillDetailSearch[logistic_company_check_bill_no]' => $model->logistic_company_check_bill_no], ['target' => '_blank']);
+                            },
+                            'update' => function ($url, $model) {
+                                if ($model->status == LogisticCompanyCheckBill::STATUS_NEW) {
+                                    return Html::a('修改', 'update?id=' . $model->id, ['target' => '_blank']);
+                                }
                             },
                             'print' => function ($url, $model) {
                                 return Html::a('打印', 'print?id=' . $model->id, ['target' => '_blank']);

@@ -56,7 +56,7 @@ class DeliveryOrderTaskController extends Controller
                 if ($task['type'] == DeliveryOrderTask::TYPE_ORDER) {
                     $return = DeliveryOrder::batchUpdate($excelData, 'system');
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
-                    $return = LogisticCompanyCheckBillDetail::batchUpdate($excelData, 'system');
+                    $return = LogisticCompanyCheckBillDetail::batchUpdate($excelData, $task['order_type'],'system');
                 }
                 $return['errorList'] = !empty($return['errorList']) ? join("|", $return['errorList']) : '';
                 $ret['success'] = 1;
@@ -89,11 +89,16 @@ class DeliveryOrderTaskController extends Controller
         ];
 
        try {
-            $filePath = './3.xlsx';
+           $type = 2;
+            $filePath = './1.xlsx';
             $excelData = Utility::getExcelDataNew($filePath);
             $orderDataList = array_chunk($excelData, 1000);
             foreach ($orderDataList as $key => $orderData) {
-                $return = DeliveryOrder::batchUpdate($orderData, 'system');
+                if ($type == DeliveryOrderTask::TYPE_ORDER) {
+                    $return = DeliveryOrder::batchUpdate($excelData, 'system');
+                } elseif ($type == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
+                    $return = LogisticCompanyCheckBillDetail::batchUpdate($excelData, 'system');
+                }
                 echo "第" . $key . "批，导入结果：" . json_encode($return, JSON_UNESCAPED_UNICODE) . "\r\n";
                 sleep(2);
             }

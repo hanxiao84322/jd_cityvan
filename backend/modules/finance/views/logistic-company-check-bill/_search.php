@@ -70,6 +70,8 @@ Modal::begin([
         'method' => 'post',
         'options' => ['enctype' => 'multipart/form-data', 'id' => 'upload-form'],
     ]); ?>
+<div style="width: 50%; height: 100px;">    对账单类型：<?= Html::dropDownList('type', '', [\common\models\LogisticCompanyCheckBill::TYPE_PAY => \common\models\LogisticCompanyCheckBill::$typeList[\common\models\LogisticCompanyCheckBill::TYPE_PAY], \common\models\LogisticCompanyCheckBill::TYPE_REC => \common\models\LogisticCompanyCheckBill::$typeList[\common\models\LogisticCompanyCheckBill::TYPE_REC]],['class' => 'form-control', 'id' => 'order_type']) ?>
+</div>
     <?= Html::fileInput('file', '', ['id' => 'file_input']) ?>
     <?php ActiveForm::end(); ?>
 </p>
@@ -92,9 +94,11 @@ Modal::end();
             const btn = $('#task-create');
             const show = $('#message');
             const fileInput = $('#file_input').get(0);
+            const orderType = $('#order_type').val();
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             formData.append('type', <?php echo DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL;?>);
+            formData.append('order_type', orderType);
             $.ajax({
                 url: '/delivery/delivery-order-task/ajax-create',
                 cache: false,

@@ -177,6 +177,8 @@ class LogisticCompanyCheckBillController extends Controller
         ];
         // 文件校验
         try {
+            $post = $this->request->post();
+            $type = $post['type'];
             if (!isset($_FILES['file'])) {
                 throw new \Exception('上传文件不能为空');
             }
@@ -209,7 +211,7 @@ class LogisticCompanyCheckBillController extends Controller
             $return['errorList'] = '数据量太大，不能超过5000条。';
             exit(Json::encode($return));
         }
-        $return = LogisticCompanyCheckBillDetail::batchUpdate($excelData, \Yii::$app->user->getIdentity()['username']);
+        $return = LogisticCompanyCheckBillDetail::batchUpdate($excelData, $type, \Yii::$app->user->getIdentity()['username']);
         $return['status'] = 1;
         $return['errorList'] = Utility::arrayToString($return['errorList']);
 

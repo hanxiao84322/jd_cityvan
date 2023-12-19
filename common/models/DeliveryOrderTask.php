@@ -11,6 +11,7 @@ use Yii;
  * @property int $id 自增ID
  * @property string|null $file_path 文件路径
  * @property int|null $type 类型 1 订单 2 对账单 ...
+ * @property int|null $order_type 单据类型
  * @property int|null $status 执行状态 0 未执行 1 执行中 2 执行完成
  * @property string|null $result 结果
  * @property string|null $apply_username 提交人用户名
@@ -49,7 +50,7 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['status', 'type'], 'integer'],
+            [['status', 'type', 'order_type'], 'integer'],
             [['file_path', 'result'], 'string'],
             [['apply_time', 'start_time', 'end_time'], 'safe'],
             [['apply_username'], 'string', 'max' => 50],

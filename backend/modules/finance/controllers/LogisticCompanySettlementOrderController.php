@@ -98,6 +98,7 @@ class LogisticCompanySettlementOrderController extends Controller
             $model->need_pay_amount = $logisticCompanyCheckBillModel->system_order_price;
             $model->need_receipt_amount = 0;
             $model->expect_amount = $logisticCompanyCheckBillModel->system_order_price;
+            $model->type = $logisticCompanyCheckBillModel->type;
             $model->date = date('Y-m-d', time());
             if ($this->request->isPost) {
                 $post = $this->request->post();
@@ -107,7 +108,6 @@ class LogisticCompanySettlementOrderController extends Controller
                     }
                 }
                 $model->load($post);
-                $model->type = LogisticCompanySettlementOrder::TYPE_PAY;
                 if ($model->diff_adjust_plan == LogisticCompanySettlementOrder::DIFF_ADJUST_PLAN_INPUT) {
                     $model->need_pay_amount = $model->need_pay_amount;
                 } else {

@@ -8,6 +8,7 @@ use Yii;
  * This is the model class for table "logistic_company_fee_rules".
  *
  * @property int $id
+ * @property int $type 类型 1 快递公司 2 客户仓库
  * @property string $warehouse_code 仓库编码
  * @property int $logistic_id 快递公司 ID
  * @property string $province 省
@@ -40,6 +41,12 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
         self::WEIGHT_ROUND_RULE_UP => '全入不舍',
     ];
 
+    const TYPE_LOGISTIC = 1;
+    const TYPE_WAREHOUSE = 2;
+    public static  $typeList = [
+        self::TYPE_LOGISTIC => '快递公司',
+        self::TYPE_WAREHOUSE => '客户仓库',
+    ];
 
     /**
      * {@inheritdoc}
@@ -55,8 +62,8 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['warehouse_code', 'logistic_id', 'province_code', 'weight', 'weight_round_rule', 'price', 'continue_weight_rule'], 'required'],
-            [['logistic_id', 'weight_round_rule', 'continue_weight_round_rule'], 'integer'],
+            [['warehouse_code', 'logistic_id', 'province_code', 'weight', 'weight_round_rule', 'price', 'continue_weight_rule', 'type'], 'required'],
+            [['logistic_id', 'weight_round_rule', 'continue_weight_round_rule', 'type'], 'integer'],
             [['weight', 'price'], 'number'],
             [['continue_weight_rule'], 'string'],
             [['create_time', 'update_time'], 'safe'],
@@ -72,6 +79,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
+            'type' => '运费规则类型',
             'warehouse_code' => '发货仓',
             'logistic_id' => '快递公司',
             'logistic_company_name' => '快递公司',
