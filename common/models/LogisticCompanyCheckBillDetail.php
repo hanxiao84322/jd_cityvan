@@ -40,7 +40,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
         self::STATUS_EXISTS => '已存在',
         self::STATUS_SYSTEM_NOT_SETTLEMENT => '订单未结算',
         self::STATUS_ORDER_NOT_FINISHED => '订单未完成',
-        self::STATUS_WEIGHT_DIFF => '重量差异',
+        self::STATUS_WEIGHT_DIFF => '金额与重量差异',
     ];
 
     /**
@@ -135,12 +135,8 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                 } else {
                     $systemWeight = $logisticCompanySettlementOrderDetailModel->weight;
                     $systemPrice = $logisticCompanySettlementOrderDetailModel->need_receipt_amount;
-                    if ($logisticCompanySettlementOrderDetailModel->weight != $orderWeight) {
+                    if ($systemWeight != $orderWeight || $systemPrice != $orderPrice) {
                         $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
-                    }
-
-                    if ($logisticCompanySettlementOrderDetailModel->need_receipt_amount != $orderPrice) {
-                        $status = LogisticCompanyCheckBillDetail::STATUS_PRICE_DIFF;
                     }
                 }
 
@@ -173,18 +169,15 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                     $logisticIdCheckBillList[$logisticId][$warehouseCode]['total_price'] = 0.00;
                 }
                 $logisticIdCheckBillList[$logisticId][$warehouseCode]['total_price'] += $orderPrice; //导入金额累加
-                if ($status == LogisticCompanyCheckBillDetail::STATUS_SAME || $status == LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF || $status == LogisticCompanyCheckBillDetail::STATUS_PRICE_DIFF) {
-                    if (!isset($logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_count'])) {
-                        $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_count'] = 0;
-                    }
-                    $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_count']++; //系统数量累加
-                    if (!isset($logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_price'])) {
-                        $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_price'] = 0.00;
-                    }
-                    $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_price'] += $systemPrice; //系统金额累加
-                } else {
+                if (!isset($logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_count'])) {
                     $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_count'] = 0;
+                }
+                if (!isset($logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_price'])) {
                     $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_price'] = 0.00;
+                }
+                if ($status == LogisticCompanyCheckBillDetail::STATUS_SAME) {
+                    $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_count']++; //系统数量累加
+                    $logisticIdCheckBillList[$logisticId][$warehouseCode]['system_total_price'] += $systemPrice; //系统金额累加
                 }
                 if (!isset($logisticIdCheckBillList[$logisticId][$warehouseCode]['detailIdList'])) {
                     $logisticIdCheckBillList[$logisticId][$warehouseCode]['detailIdList'] = [];
