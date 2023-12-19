@@ -125,7 +125,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                     $status = LogisticCompanyCheckBillDetail::STATUS_NOT_FOUND;
                 }
                 if (!in_array($deliveryOrderModel->status, [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED, DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE])) {
-                    $status = LogisticCompanyCheckBillDetail::STATUS_ORDER_NOT_FINISHED;
+                    $note .= "订单状态是" . DeliveryOrder::getStatusName($deliveryOrderModel->status) . "未达到最终状态！\r\n";
                 }
                 $systemWeight = '';
                 $systemPrice = '';

@@ -40,7 +40,6 @@ class LogisticCompanySettlementOrderDetail extends \yii\db\ActiveRecord
         return [
             [['logistic_id'], 'integer'],
             [['weight', 'size_weight', 'need_receipt_amount'], 'number'],
-            [['finish_time'], 'required'],
             [['finish_time', 'create_time'], 'safe'],
             [['settlement_order_no', 'logistic_no', 'warehouse_code', 'province', 'city', 'district', 'size'], 'string', 'max' => 50],
             [['logistic_no'], 'unique'],
