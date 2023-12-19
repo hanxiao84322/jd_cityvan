@@ -100,7 +100,6 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
         $errorList = [];
 
         $logisticIdCheckBillList = [];
-
         foreach ($excelData as $line => $item) {
             try {
                 $warehouseCode = (string)trim($item[0]);
@@ -136,21 +135,21 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                 } else {
                     $systemWeight = $logisticCompanySettlementOrderDetailModel->weight;
                     $systemPrice = $logisticCompanySettlementOrderDetailModel->need_receipt_amount;
+                    if ($logisticCompanySettlementOrderDetailModel->weight != $orderWeight) {
+                        $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
+                    }
+
+                    if ($logisticCompanySettlementOrderDetailModel->need_receipt_amount != $orderPrice) {
+                        $status = LogisticCompanyCheckBillDetail::STATUS_PRICE_DIFF;
+                    }
                 }
 
-                if ($logisticCompanySettlementOrderDetailModel->weight != $orderWeight) {
-                    $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
-                }
 
-                if ($logisticCompanySettlementOrderDetailModel->need_receipt_amount != $orderPrice) {
-                    $status = LogisticCompanyCheckBillDetail::STATUS_PRICE_DIFF;
-                }
                 $logisticCompanyCheckBillDetailExists = LogisticCompanyCheckBillDetail::findOne(['logistic_no' => $logisticNo]);
                 if ($logisticCompanyCheckBillDetailExists) {
                     $status = LogisticCompanyCheckBillDetail::STATUS_EXISTS;
                     $note = '对账单号：' . $logisticCompanyCheckBillDetailExists->logistic_company_check_bill_no;
                 }
-
                 $logisticCompanyCheckBillDetailModel = new LogisticCompanyCheckBillDetail();
                 $logisticCompanyCheckBillDetailModel->warehouse_code = $warehouseCode;
                 $logisticCompanyCheckBillDetailModel->logistic_id = $logisticId;
