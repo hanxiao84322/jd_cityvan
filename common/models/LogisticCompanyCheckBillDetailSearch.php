@@ -59,7 +59,7 @@ class LogisticCompanyCheckBillDetailSearch extends LogisticCompanyCheckBillDetai
             return $dataProvider;
         }
         if ($this->is_diff_status) {
-            $query->andFilterWhere(['not in', 'lccbd.status', [LogisticCompanyCheckBillDetail::STATUS_SAME,LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF, LogisticCompanyCheckBillDetail::STATUS_PRICE_DIFF]]);
+            $query->andFilterWhere(['!=', 'lccbd.status', LogisticCompanyCheckBillDetail::STATUS_SAME]);
         }
         $query->andFilterWhere([
             'lccbd.status' => $this->status,
