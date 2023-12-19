@@ -135,7 +135,13 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                 } else {
                     $systemWeight = $logisticCompanySettlementOrderDetailModel->weight;
                     $systemPrice = $logisticCompanySettlementOrderDetailModel->need_receipt_amount;
-                    if ($systemWeight != $orderWeight || $systemPrice != $orderPrice) {
+                    if ($systemWeight != $orderWeight) {
+                        $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
+                        if ($systemPrice == $orderPrice) {
+                            $status = LogisticCompanyCheckBillDetail::STATUS_SAME;
+                        }
+                    }
+                    if ($systemPrice != $orderPrice) {
                         $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
                     }
                 }
