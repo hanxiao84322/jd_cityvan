@@ -36,28 +36,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'district',
             'weight',
             [
-                'label' => '首重取整规则',
+                'label' => '订单重量取整规则',
                 'value' =>
                     function ($model) {
                         return \common\models\LogisticCompanyFeeRules::getWeightRoundRule($model->weight_round_rule);
                     },
             ],
             'price',
-            [
-                'format' => 'raw',
-                'label' => '快递公司',
-                'value' =>
-                    function ($model) {
-                        return \common\models\LogisticCompanyFeeRules::getContinueWeightRoundRuleView($model->continue_weight_rule);
-                    },
-            ],
-            [
-                'label' => '续重取整规则',
-                'value' =>
-                    function ($model) {
-                        return \common\models\LogisticCompanyFeeRules::getWeightRoundRule($model->continue_weight_round_rule);
-                    },
-            ],
             'create_username',
             'create_time',
             //'update_username',

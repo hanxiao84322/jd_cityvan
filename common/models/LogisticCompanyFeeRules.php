@@ -55,7 +55,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['warehouse_code', 'logistic_id', 'province_code', 'weight', 'weight_round_rule', 'price', 'continue_weight_rule', 'continue_weight_round_rule', 'create_username', 'create_time'], 'required'],
+            [['warehouse_code', 'logistic_id', 'province_code', 'weight', 'weight_round_rule', 'price', 'continue_weight_rule'], 'required'],
             [['logistic_id', 'weight_round_rule', 'continue_weight_round_rule'], 'integer'],
             [['weight', 'price'], 'number'],
             [['continue_weight_rule'], 'string'],

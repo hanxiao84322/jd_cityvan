@@ -32,7 +32,7 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'weight', ['options' => ['class' => 'col-xs-3']])->textInput(['maxlength' => true])->label('首重(公斤)') ?>
 </div>
 <div class="row">
-    <?= $form->field($model, 'weight_round_rule', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$weightRoundRuleList)->label('首重取整规则') ?>
+    <?= $form->field($model, 'weight_round_rule', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$weightRoundRuleList)->label('订单重量取整规则') ?>
 
 </div>
 <div class="row">
@@ -48,10 +48,6 @@ use yii\widgets\ActiveForm;
         1,2,3<br>
         2,3,2<br>
         3,,2</p>
-</div>
-<div class="row">
-    <?= $form->field($model, 'continue_weight_round_rule', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$weightRoundRuleList)->label('续重取整规则') ?>
-
 </div>
 <div class="form-group">
     <?= Html::submitButton('保存', ['class' => 'btn btn-success']) ?>
