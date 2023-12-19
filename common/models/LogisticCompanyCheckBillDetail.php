@@ -57,7 +57,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['warehouse_code', 'logistic_id', 'logistic_no', 'weight', 'price', 'system_weight', 'system_price', 'status', 'create_username', 'create_time'], 'required'],
+            [['warehouse_code', 'logistic_id', 'logistic_no', 'weight', 'price', 'status', 'create_username', 'create_time'], 'required'],
             [['logistic_id', 'status'], 'integer'],
             [['weight', 'price', 'system_weight', 'system_price'], 'number'],
             [['note'], 'string'],
