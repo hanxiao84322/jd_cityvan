@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return LogisticCompanyCheckBillDetail::getStatusName($model->status);
                         }
                     ],
-                    //'note:ntext',
+                    'note:ntext',
                     'create_username',
                     'create_time',
                 ],
