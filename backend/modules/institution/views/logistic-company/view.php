@@ -16,6 +16,10 @@ $this->params['breadcrumbs'][] = ['label' => '快递公司管理', 'url' => ['in
         <?= \common\components\LayoutHelper::boxBegin('快递公司详情') ?>
         <table class="table table-bordered " style="width:50%">
             <tr>
+                <td><b>快递公司ID</b></td>
+                <td><?=$model->id?></td>
+            </tr>
+            <tr>
                 <td><b>名称</b></td>
                 <td><?=$model->company_name?></td>
             </tr>
