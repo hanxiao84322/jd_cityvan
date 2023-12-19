@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => ['class' => 'hidden']//关闭分页
         ],
         'columns' => [
+            'id',
             'company_name',
             [
                 'header' => '状态',

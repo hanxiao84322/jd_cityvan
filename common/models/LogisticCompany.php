@@ -51,7 +51,7 @@ class LogisticCompany extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
+            'id' => '快递公司ID',
             'company_name' => '快递公司名称',
             'status' => '状态',
             'responsible_area' => 'Responsible Area',
