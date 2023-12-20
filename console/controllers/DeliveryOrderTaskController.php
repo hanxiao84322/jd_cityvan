@@ -47,13 +47,13 @@ class DeliveryOrderTaskController extends Controller
                 }
 
                 if (!file_exists($task['file_path']) || !is_readable($task['file_path'])) {
-                    throw new \Exception('任务ID：' . $taskId . '文件不存在或者不可读');
+                    throw new \Exception('task id：' . $taskId . 'file not found');
                 }
 
 //                if (count($excelData) >= 50000) {
 //                    throw new \Exception($errMsg . '数据量太大，不能超过50000条');
 //                }
-                echo "文件验证通过，开始批量导入\r\n";
+                echo "file verify success, begin import\r\n";
                 $return = [
                     'successCount' => 0,
                     'errorCount' => 0,
@@ -62,8 +62,9 @@ class DeliveryOrderTaskController extends Controller
                 if ($task['type'] == DeliveryOrderTask::TYPE_ORDER) {
                     $excelData = Utility::getExcelDataNew($task['file_path']);
                     if (empty($excelData)) {
-                        throw new \Exception('任务ID：' . $taskId  . '数据为空');
+                        throw new \Exception('task id：' . $taskId  . 'data is empty');
                     }
+                    echo "data count:" . count($excelData) . "\r\n";
                     foreach ($excelData as $line => $item) {
                         try {
                             $address = Utility::changeToArea($item[11]);
@@ -160,7 +161,7 @@ class DeliveryOrderTaskController extends Controller
                                 throw new \Exception(Utility::arrayToString($deliveryOrderModel->getErrors()));
                             }
                             $return['successCount']++;
-                            echo "line:' . $line . 'insert success\r\n";
+                            echo "line:" . $line . "insert success\r\n";
                         } catch (\Exception $e) {
                             $return['errorCount']++;
                             $errMsg = 'line:' . $line . ' insert error，reason:' . $e->getMessage();
@@ -171,8 +172,9 @@ class DeliveryOrderTaskController extends Controller
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
                     $excelData = Utility::getExcelDataNewNew($task['file_path']);
                     if (empty($excelData)) {
-                        throw new \Exception('任务ID：' . $taskId . '数据为空');
+                        throw new \Exception('task id：' . $taskId  . 'data is empty');
                     }
+                    echo "data count:" . count($excelData) . "\r\n";
                     foreach ($excelData as $line => $item) {
                         try {
                             $warehouseCode = (string)trim($item[0]);
@@ -263,7 +265,7 @@ class DeliveryOrderTaskController extends Controller
                             }
                             $logisticIdCheckBillList[$logisticId][$warehouseCode]['detailIdList'][] = $logisticCompanyCheckBillDetailModel->id;
                             $return['successCount']++;
-                            echo "line:' . $line . 'insert success\r\n";
+                            echo "line:" . $line . "insert success\r\n";
                         } catch (\Exception $e) {
                             $return['errorCount']++;
                             $errMsg = 'line:' . $line . ' insert error，reason:' . $e->getMessage();
@@ -327,8 +329,7 @@ class DeliveryOrderTaskController extends Controller
             $taskModel->end_time = date('Y-m-d H:i:s', time());
             $taskModel->result = Json::encode($ret);
             if (!$taskModel->save()) {
-                echo "更新任务数据失败。" . Utility::arrayToString($taskModel->getErrors());
-                exit;
+                echo "更新任务数据失败。" . Utility::arrayToString($taskModel->getErrors()) . "\r\n";
             }
         }
         echo "finish";
@@ -350,7 +351,6 @@ class DeliveryOrderTaskController extends Controller
            $type = 2;
             $filePath = './1.xlsx';
             $excelData = Utility::getExcelDataNewNew($filePath);
-            print_r($excelData);exit;
             $orderDataList = array_chunk($excelData, 1000);
             foreach ($orderDataList as $key => $orderData) {
                 if ($type == DeliveryOrderTask::TYPE_ORDER) {
