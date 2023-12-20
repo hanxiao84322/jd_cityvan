@@ -133,7 +133,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                             $logisticCompanySettlementOrderDetailModel->finish_time = $finishedTime;
                             $logisticCompanySettlementOrderDetailModel->create_time = date('Y-m-d H:i:s', time());
                         }
-                        $logisticCompanySettlementOrderDetailModel->need_receipt_amount = $fee;
+                        $logisticCompanySettlementOrderDetailModel->need_pay_amount = $fee;
                         if (!$logisticCompanySettlementOrderDetailModel->save()) {
                             throw new \Exception("快递公司ID：" . $itemLogisticId . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . "快递单号：" . $itemLogisticNo . "更新快递公司结算单明细失败，原因:" . Utility::arrayToString($logisticCompanySettlementOrderDetailModel->getErrors()));
                         } else {

@@ -111,16 +111,16 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                 if (empty($warehouseCode) && empty($logisticId) && empty($logisticNo) && empty($orderWeight) && empty($orderPrice)) {
                     continue;
                 }
-                $logisticCompanyModel = LogisticCompany::findOne($logisticId);
-                if (!$logisticCompanyModel) {
-                    throw new \Exception('不存在的快递公司ID:' . $logisticId);
-                }
-                $warehouseModel = Warehouse::findOne(['code' => $warehouseCode]);
-                if (!$warehouseModel) {
-                    throw new \Exception('不存在的仓库编码:' . $warehouseCode);
-                }
+    //                $logisticCompanyModel = LogisticCompany::findOne($logisticId);
+    //                if (!$logisticCompanyModel) {
+    //                    throw new \Exception('不存在的快递公司ID:' . $logisticId);
+    //                }
+    //                $warehouseModel = Warehouse::findOne(['code' => $warehouseCode]);
+    //                if (!$warehouseModel) {
+    //                    throw new \Exception('不存在的仓库编码:' . $warehouseCode);
+    //                }
                 $status = LogisticCompanyCheckBillDetail::STATUS_SAME;
-                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo, 'logistic_id' => $logisticId]);
+                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode , 'logistic_no' => $logisticNo]);
                 if (!$deliveryOrderModel) {
                     $status = LogisticCompanyCheckBillDetail::STATUS_NOT_FOUND;
                 }
@@ -135,7 +135,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                     $status = LogisticCompanyCheckBillDetail::STATUS_SYSTEM_NOT_SETTLEMENT;
                 } else {
                     $systemWeight = $logisticCompanySettlementOrderDetailModel->weight;
-                    $systemPrice = $logisticCompanySettlementOrderDetailModel->need_receipt_amount;
+                    $systemPrice = $logisticCompanySettlementOrderDetailModel->need_pay_amount;
                     if ($systemWeight != $orderWeight) {
                         $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
                         if ($systemPrice == $orderPrice) {
@@ -146,7 +146,6 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
                         $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
                     }
                 }
-
 
                 $logisticCompanyCheckBillDetailExists = LogisticCompanyCheckBillDetail::findOne(['logistic_no' => $logisticNo]);
                 if ($logisticCompanyCheckBillDetailExists) {

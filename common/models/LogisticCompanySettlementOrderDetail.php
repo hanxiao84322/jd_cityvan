@@ -16,8 +16,10 @@ use Yii;
  * @property string|null $city 市
  * @property string|null $district 区/县
  * @property float|null $weight 重量千克
+ * @property float|null $jd_weight 京东结算重量千克
  * @property string|null $size 体积
  * @property float|null $size_weight 体积重量
+ * @property float|null $need_pay_amount 应付金额元
  * @property float|null $need_receipt_amount 应收金额元
  * @property string $finish_time 到达最终状态时间 妥投时间 拒收时间 丢失时间
  * @property string|null $create_time 创建时间
@@ -39,7 +41,7 @@ class LogisticCompanySettlementOrderDetail extends \yii\db\ActiveRecord
     {
         return [
             [['logistic_id'], 'integer'],
-            [['weight', 'size_weight', 'need_receipt_amount'], 'number'],
+            [['weight', 'size_weight', 'need_receipt_amount', 'need_pay_amount'], 'number'],
             [['finish_time', 'create_time'], 'safe'],
             [['settlement_order_no', 'logistic_no', 'warehouse_code', 'province', 'city', 'district', 'size'], 'string', 'max' => 50],
             [['logistic_no'], 'unique'],

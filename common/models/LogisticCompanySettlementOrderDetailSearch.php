@@ -65,7 +65,6 @@ class LogisticCompanySettlementOrderDetailSearch extends LogisticCompanySettleme
             'logistic_id' => $this->logistic_id,
             'weight' => $this->weight,
             'size_weight' => $this->size_weight,
-            'need_receipt_amount' => $this->need_receipt_amount,
             'finish_time' => $this->finish_time,
             'create_time' => $this->create_time,
         ]);
