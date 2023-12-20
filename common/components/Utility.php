@@ -748,7 +748,6 @@ class Utility
             }
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(true); // 设置为 false 会循环所有的单元格，即使单元格的值没有设置。设置为 true 的话就只会遍历有设置过值的单元格，默认值为 false。
-            $cellIterator->setCalculationCacheEnabled(false);
             foreach ($cellIterator as $cell) {
                 $val = $cell->getValue();
                 if (is_integer($val) && strlen($val) == 5) {
