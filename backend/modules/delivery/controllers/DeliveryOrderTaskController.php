@@ -76,13 +76,13 @@ class DeliveryOrderTaskController extends Controller
      */
     public function actionAjaxCreate()
     {
+        ini_set("max_execution_time", 300);
+        ini_set('memory_limit', '128M');    
         $return = [
             'status' => 0,
             'msg' => '',
         ];
         try {
-            $post = $this->request->post();
-            $type = $post['type'];
             $file = $_FILES['file'];
             $path = $_SERVER['DOCUMENT_ROOT'] . '/../task_file/' . date('Y-m-d', time()) . '/';
             $filePath = $path . time() . '.xlsx';
@@ -98,10 +98,6 @@ class DeliveryOrderTaskController extends Controller
             if ($file['size'] > 5097152) {
                 throw new \Exception('上传文件不能超过5MB');
             }
-            $excelData = Utility::getExcelDataNew($file['tmp_name']);
-            if (empty($excelData)) {
-                throw new \Exception('上传文件无内容');
-            }
 
             //创建目录失败
             if (!file_exists($path) && !mkdir($path, 0777, true)) {
@@ -113,25 +109,22 @@ class DeliveryOrderTaskController extends Controller
                 throw new \Exception('复制文件失敗');
             }
 
-
+            $model = new DeliveryOrderTask();
+            $post = $this->request->post();
+            $post['DeliveryOrderTask']['file_path'] = $filePath;
+            $post['DeliveryOrderTask']['type'] = $post['type'];
+            $post['DeliveryOrderTask']['order_type'] = !empty($post['order_type']) ? $post['order_type'] : '';
+            $post['DeliveryOrderTask']['apply_time'] = date('Y-m-d H:i:s', time());
+            $post['DeliveryOrderTask']['apply_username'] = \Yii::$app->user->getIdentity()['username'];
+            unset($post['type']);
+            if ($model->load($post) && $model->save()) {
+                $return['status'] = 1;
+                $return['msg'] = '文件已经成功上传，请稍后转至任务列表查看进度。';
+            } else {
+                $return['msg'] = Utility::arrayToString($model->getErrors());
+            }
         } catch (\Exception $e) {
             $return['msg'] = $e->getMessage();
-            exit(Json::encode($return));
-        }
-
-        $model = new DeliveryOrderTask();
-        $post = $this->request->post();
-        $post['DeliveryOrderTask']['file_path'] = $filePath;
-        $post['DeliveryOrderTask']['type'] = $post['type'];
-        $post['DeliveryOrderTask']['order_type'] = !empty($post['order_type']) ? $post['order_type'] : '';
-        $post['DeliveryOrderTask']['apply_time'] = date('Y-m-d H:i:s', time());
-        $post['DeliveryOrderTask']['apply_username'] = \Yii::$app->user->getIdentity()['username'];
-        unset($post['type']);
-        if ($model->load($post) && $model->save()) {
-            $return['status'] = 1;
-            $return['msg'] = '文件已经成功上传，请稍后转至任务列表查看进度。';
-        } else {
-            $return['msg'] = Utility::arrayToString($model->getErrors());
         }
         exit(Json::encode($return));
 
