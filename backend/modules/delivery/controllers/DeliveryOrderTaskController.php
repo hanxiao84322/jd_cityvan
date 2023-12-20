@@ -123,7 +123,7 @@ class DeliveryOrderTaskController extends Controller
         $post = $this->request->post();
         $post['DeliveryOrderTask']['file_path'] = $filePath;
         $post['DeliveryOrderTask']['type'] = $post['type'];
-        $post['DeliveryOrderTask']['order_type'] = $post['order_type'];
+        $post['DeliveryOrderTask']['order_type'] = !empty($post['order_type']) ? $post['order_type'] : '';
         $post['DeliveryOrderTask']['apply_time'] = date('Y-m-d H:i:s', time());
         $post['DeliveryOrderTask']['apply_username'] = \Yii::$app->user->getIdentity()['username'];
         unset($post['type']);
