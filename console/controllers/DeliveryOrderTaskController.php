@@ -54,6 +54,7 @@ class DeliveryOrderTaskController extends Controller
 //                if (count($excelData) >= 50000) {
 //                    throw new \Exception($errMsg . '数据量太大，不能超过50000条');
 //                }
+                echo "文件验证通过，开始批量导入\r\n";
                 if ($task['type'] == DeliveryOrderTask::TYPE_ORDER) {
                     $return = DeliveryOrder::batchUpdate($excelData, 'system');
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
