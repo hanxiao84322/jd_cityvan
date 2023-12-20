@@ -29,6 +29,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => ['class' => 'hidden']//关闭分页
         ],
         'columns' => [
+            [
+                'label' => '类型',
+                'value' =>
+                    function ($model) {
+                        return \common\models\LogisticCompanyFeeRules::getTypeName($model->type);
+                    },
+            ],
             'warehouse_code',
             'logistic_company_name',
             'province',

@@ -20,7 +20,7 @@ class LogisticCompanyFeeRulesSearch extends LogisticCompanyFeeRules
     {
         return [
             [['id', 'logistic_id', 'weight_round_rule', 'continue_weight_round_rule'], 'integer'],
-            [['warehouse_code', 'province', 'city', 'district', 'continue_weight_rule', 'create_username', 'create_time', 'update_username', 'update_time'], 'safe'],
+            [['warehouse_code', 'province', 'city', 'district', 'continue_weight_rule', 'create_username', 'create_time', 'update_username', 'update_time', 'type'], 'safe'],
             [['weight', 'price'], 'number'],
         ];
     }
@@ -61,8 +61,9 @@ class LogisticCompanyFeeRulesSearch extends LogisticCompanyFeeRules
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'lcfr。logistic_id' => $this->logistic_id,
-            'lcfr。warehouse_code' => $this->warehouse_code,
+            'lcfr.logistic_id' => $this->logistic_id,
+            'lcfr.type' => $this->type,
+            'lcfr.warehouse_code' => $this->warehouse_code,
         ]);
 
         return $dataProvider;

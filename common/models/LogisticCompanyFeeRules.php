@@ -136,5 +136,9 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
         return isset(self::$weightRoundRuleList[$WeightRoundRule]) ? self::$weightRoundRuleList[$WeightRoundRule] : '无';
     }
 
+    public static function getTypeName($type)
+    {
+        return isset(self::$typeList[$type]) ? self::$typeList[$type] : '无';
+    }
 
 }
