@@ -33,6 +33,13 @@ class DeliveryOrderTaskController extends Controller
         foreach ($taskList as $task) {
             try {
                 $taskId = $task['id'];
+                $taskModel = DeliveryOrderTask::findOne($taskId);
+                $taskModel->status = DeliveryOrderTask::STATUS_UPDATING;
+                $taskModel->start_time = date('Y-m-d H:i:s', time());
+                if (!$taskModel->save()) {
+                    throw new \Exception(Utility::arrayToString($taskModel->getErrors()));
+                }
+
                 $errMsg = '任务ID：' . $taskId;
                 if (!file_exists($task['file_path']) || !is_readable($task['file_path'])) {
                     throw new \Exception($errMsg . '文件不存在或者不可读');
@@ -44,15 +51,9 @@ class DeliveryOrderTaskController extends Controller
                 if (empty($excelData)) {
                     throw new \Exception($errMsg . '数据为空');
                 }
-                if (count($excelData) >= 50000) {
-                    throw new \Exception($errMsg . '数据量太大，不能超过50000条');
-                }
-                $taskModel = DeliveryOrderTask::findOne($taskId);
-                $taskModel->status = DeliveryOrderTask::STATUS_UPDATING;
-                $taskModel->start_time = date('Y-m-d H:i:s', time());
-                if (!$taskModel->save()) {
-                    throw new \Exception(Utility::arrayToString($taskModel->getErrors()));
-                }
+//                if (count($excelData) >= 50000) {
+//                    throw new \Exception($errMsg . '数据量太大，不能超过50000条');
+//                }
                 if ($task['type'] == DeliveryOrderTask::TYPE_ORDER) {
                     $return = DeliveryOrder::batchUpdate($excelData, 'system');
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
