@@ -5,7 +5,7 @@ namespace common\components;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
+use PhpOffice\PhpSpreadsheet\IOFactory;
 class Utility
 {
 
@@ -748,6 +748,7 @@ class Utility
             }
             $cellIterator = $row->getCellIterator();
             $cellIterator->setIterateOnlyExistingCells(true); // 设置为 false 会循环所有的单元格，即使单元格的值没有设置。设置为 true 的话就只会遍历有设置过值的单元格，默认值为 false。
+            $cellIterator->setCalculationCacheEnabled(false);
             foreach ($cellIterator as $cell) {
                 $val = $cell->getValue();
                 if (is_integer($val) && strlen($val) == 5) {
@@ -768,6 +769,46 @@ class Utility
             }
         }
         return $arr;
+    }
+
+
+    /**
+     * 读取Excel数据.
+     *
+     * @param $file
+     * @param $startRow
+     *
+     * @return array
+     */
+    public static function getExcelDataNewNew($file)
+    {
+        // 指定要导入的 Excel 文件路径
+
+// 创建一个新的 Spreadsheet 对象
+        $spreadsheet = IOFactory::load($file);
+
+// 获取第一个工作表（Worksheet）
+        $worksheet = $spreadsheet->getActiveSheet();
+
+// 获取最大列数和最大行数
+        $highestColumn = $worksheet->getHighestColumn();
+        $highestRow = $worksheet->getHighestRow();
+
+// 定义存储数据的数组
+        $data = [];
+
+// 循环遍历每个单元格，并将其值存储到数组中
+        for ($row = 2; $row <= $highestRow; $row++) {
+            $rowData = [];
+            for ($col = 'A'; $col <= $highestColumn; $col++) {
+                $cellValue = $worksheet->getCell($col . $row)->getValue();
+                $rowData[] = $cellValue;
+            }
+            $data[] = $rowData;
+        }
+
+// 返回数组
+        return $data;
     }
 
     /**

@@ -45,20 +45,22 @@ class DeliveryOrderTaskController extends Controller
                 if (!file_exists($task['file_path']) || !is_readable($task['file_path'])) {
                     throw new \Exception($errMsg . '文件不存在或者不可读');
                 }
-                $excelData = Utility::getExcelDataNew($task['file_path']);
-                if (empty($excelData)) {
-                    throw new \Exception($errMsg . '文件为空');
-                }
-                if (empty($excelData)) {
-                    throw new \Exception($errMsg . '数据为空');
-                }
+
 //                if (count($excelData) >= 50000) {
 //                    throw new \Exception($errMsg . '数据量太大，不能超过50000条');
 //                }
                 echo "文件验证通过，开始批量导入\r\n";
                 if ($task['type'] == DeliveryOrderTask::TYPE_ORDER) {
+                    $excelData = Utility::getExcelDataNew($task['file_path']);
+                    if (empty($excelData)) {
+                        throw new \Exception($errMsg . '数据为空');
+                    }
                     $return = DeliveryOrder::batchUpdate($excelData, 'system');
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
+                    $excelData = Utility::getExcelDataNewNew($task['file_path']);
+                    if (empty($excelData)) {
+                        throw new \Exception($errMsg . '数据为空');
+                    }
                     $return = LogisticCompanyCheckBillDetail::batchUpdate($excelData, $task['order_type'],'system');
                 }
                 $return['errorList'] = !empty($return['errorList']) ? join("|", $return['errorList']) : '';
@@ -94,7 +96,8 @@ class DeliveryOrderTaskController extends Controller
        try {
            $type = 2;
             $filePath = './1.xlsx';
-            $excelData = Utility::getExcelDataNew($filePath);
+            $excelData = Utility::getExcelDataNewNew($filePath);
+            print_r($excelData);exit;
             $orderDataList = array_chunk($excelData, 1000);
             foreach ($orderDataList as $key => $orderData) {
                 if ($type == DeliveryOrderTask::TYPE_ORDER) {

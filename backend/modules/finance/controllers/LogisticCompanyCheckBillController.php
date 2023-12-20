@@ -194,7 +194,7 @@ class LogisticCompanyCheckBillController extends Controller
             if ($file['size'] > 2097152) {
                 throw new \Exception('上传文件不能超过2MB');
             }
-            $excelData = Utility::getExcelDataNew($file['tmp_name']);
+            $excelData = Utility::getExcelDataNewNew($file['tmp_name']);
             if (empty($excelData)) {
                 throw new \Exception('上传文件无内容');
             }
