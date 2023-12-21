@@ -177,13 +177,11 @@ class DeliveryOrderTaskController extends Controller
                         }
                         echo "data count:" . count($excelData) . "\r\n";
                         $tempOrderNo = 'TZF' . (string)time();
-                        $result = []; // 存储最终结果的数组
-                        $processes = 10; // 需要创建的子进程数量
+                        $processes = count($excelData)/1000; // 需要创建的子进程数量
                         $chunks = array_chunk($excelData, ceil(count($excelData) / $processes)); // 将大数组拆分成多个小数组
                         $tempFiles = []; // 用于存储临时文件名的数组
                         // 创建指定数量的子进程
                         for ($i = 0; $i < $processes; $i++) {
-                            echo "sub processes:" . $i . "is begin.\r\n";
                             try {
                                 $pid = pcntl_fork();
                                 if ($pid == -1) {
@@ -207,12 +205,11 @@ class DeliveryOrderTaskController extends Controller
                             } catch (\Exception $e) {
                                 $ret['msg'] = $e->getMessage();
                             }
-                            echo "sub processes:" . $i . "is end.\r\n";
                         }
                         // 等待子进程完成，并获取结果
                         for ($i = 1; $i <= $processes; $i++) {
                             pcntl_wait($status);
-                            echo "sub process {$i} is finish job：" . print_r($result, true) . "\n";
+                            echo "sub process {$i} is finish job\r\n";
                         }
                         $results = [];
                         if (!empty($tempFiles)) {
