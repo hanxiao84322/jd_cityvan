@@ -17,6 +17,11 @@ class LogisticCompanyCheckBillController extends Controller
      */
     public function actionRun($logisticCompanyCheckBillNo = '')
     {
+        $return = [
+            'successCount' => 0,
+            'errorCount' => 0,
+            'errorList' => [],
+        ];
         $sql = "SELECT DISTINCT logistic_company_check_bill_no FROM `logistic_company_check_bill_detail` WHERE  1 ";
 
 
@@ -35,7 +40,6 @@ class LogisticCompanyCheckBillController extends Controller
         echo "total count:" . count($result) . "\r\n";
         foreach ($result as $tempBillNo) {
             try {
-
                 $logisticCompanyCheckBillSql = "SELECT order_type, logistic_id, warehouse_code, count(logistic_no) as total_count, sum(CASE WHEN (status = 1) THEN 1 ELSE 0 END) as system_total_count, sum(price) as total_price, sum(CASE WHEN (status = 1) THEN price ELSE 0 END) as system_total_price FROM `logistic_company_check_bill_detail` WHERE logistic_company_check_bill_no = '" . $tempBillNo . "' group by order_type, logistic_id, warehouse_code";
                 $logisticCompanyCheckBillResult = \Yii::$app->db->createCommand($logisticCompanyCheckBillSql)->queryAll();
 
@@ -58,18 +62,20 @@ class LogisticCompanyCheckBillController extends Controller
                             throw new \Exception(Utility::arrayToString($logisticCompanyCheckBillModel->getErrors()));
                         }
                         LogisticCompanyCheckBillDetail::updateAll(['logistic_company_check_bill_no' => $logisticCompanyCheckBillModel->logistic_company_check_bill_no], ['logistic_company_check_bill_no' => $tempBillNo]);
-                        echo 'logistic_company_check_bill_no：' . $logisticCompanyCheckBillModel->logistic_company_check_bill_no . " check bill insert success\r\n";
+                        $return['successCount']++;
                     } catch (\Exception $e) {
                         $errMsg = 'logistic_company_check_bill_no：' . $tempBillNo . " check bill insert error,reason:" . $e->getMessage();
-                        echo $errMsg . "\r\n";
+                        $return['errorCount']++;
+                        $return['errorList'][] = $errMsg;
                     }
                 }
+
             } catch (\Exception $e) {
                 $errMsg = 'logistic_company_check_bill_no：' . $tempBillNo . " check bill insert error,reason:" . $e->getMessage();
-                echo $errMsg . "\r\n";
+                $return['errorCount']++;
+                $return['errorList'][] = $errMsg;
             }
-            echo "success\r\n";
         }
-        echo "finished\r\n";
+        echo json_encode($return);
     }
 }

@@ -235,6 +235,10 @@ class DeliveryOrderTaskController extends Controller
                                 }
                             }
                         }
+                        if ($return['errorCount'] == 0) {
+                            $output = exec("./yii logistic-company-check-bill/run");
+                            $return = json_decode($output, true);
+                        }
                     } catch (\Exception $e) {
                         echo $e->getMessage();
                     }
@@ -554,11 +558,14 @@ class DeliveryOrderTaskController extends Controller
     {
         date_default_timezone_set("Asia/Shanghai");
         ini_set('memory_limit', '512M');
+
+
         $ret = [
             'success' => 0,
             'msg' => '',
             'return' => []
         ];
+
         $type = 2;
         $filePath = './1.xlsx';
 
@@ -744,6 +751,8 @@ class DeliveryOrderTaskController extends Controller
                     }
                 }
                 print_r($return);
+                $output = exec("./yii logistic-company-check-bill/run");
+                var_dump($output);exit;
             } catch (\Exception $e) {
                 echo $e->getMessage();
             }
