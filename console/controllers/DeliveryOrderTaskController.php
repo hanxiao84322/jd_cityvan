@@ -191,6 +191,8 @@ class DeliveryOrderTaskController extends Controller
                                 } elseif ($pid) {
                                     $tempFiles[$pid] = "temp_file_$pid.txt";
                                 } else {
+                                    \Yii::$app->db->close(); // Close the connection if opened
+                                    \Yii::$app->db->open();  // Reopen the connection
                                     $tempFile = "temp_file_" . getmypid() . ".txt";
                                     // 打开临时文件用于写入
                                     $tempHandle = fopen($tempFile, 'w');
@@ -199,10 +201,11 @@ class DeliveryOrderTaskController extends Controller
                                     fwrite($tempHandle, json_encode($result) . PHP_EOL);
                                     // 关闭文件句柄并结束子进程
                                     fclose($tempHandle);
+                                    \Yii::$app->db->close();
                                     exit(); // 子进程执行完任务后退出
                                 }
                             } catch (\Exception $e) {
-                                echo $e->getMessage() . "\r\n";
+                                $ret['msg'] = $e->getMessage();
                             }
                             echo "sub processes:" . $i . "is end.\r\n";
                         }
@@ -240,7 +243,7 @@ class DeliveryOrderTaskController extends Controller
                             $return = json_decode($output, true);
                         }
                     } catch (\Exception $e) {
-                        echo $e->getMessage();
+                        $ret['msg'] = $e->getMessage();
                     }
                 }
                 $return['errorList'] = !empty($return['errorList']) ? join("|", $return['errorList']) : '';
@@ -249,6 +252,8 @@ class DeliveryOrderTaskController extends Controller
             } catch (\Exception $e) {
                 $ret['msg'] = $e->getMessage();
             }
+            \Yii::$app->db->close(); // Close the connection if opened
+            \Yii::$app->db->open();  // Reopen the connection
             $taskModel = DeliveryOrderTask::findOne($taskId);
             $taskModel->status = DeliveryOrderTask::STATUS_UPDATED;
             $taskModel->end_time = date('Y-m-d H:i:s', time());
@@ -256,6 +261,7 @@ class DeliveryOrderTaskController extends Controller
             if (!$taskModel->save()) {
                 echo "更新任务数据失败。" . Utility::arrayToString($taskModel->getErrors()) . "\r\n";
             }
+            \Yii::$app->db->close(); // Close the connection if opened
         }
         echo "finish";
     }
@@ -706,6 +712,8 @@ class DeliveryOrderTaskController extends Controller
                         } elseif ($pid) {
                             $tempFiles[$pid] = "temp_file_$pid.txt";
                         } else {
+                            \Yii::$app->db->close(); // Close the connection if opened
+                            \Yii::$app->db->open();  // Reopen the connection
                             $tempFile = "temp_file_" . getmypid() . ".txt";
                             // 打开临时文件用于写入
                             $tempHandle = fopen($tempFile, 'w');
@@ -714,6 +722,7 @@ class DeliveryOrderTaskController extends Controller
                             fwrite($tempHandle, json_encode($result) . PHP_EOL);
                             // 关闭文件句柄并结束子进程
                             fclose($tempHandle);
+                            \Yii::$app->db->close();
                             exit(); // 子进程执行完任务后退出
                         }
 
@@ -858,7 +867,7 @@ class DeliveryOrderTaskController extends Controller
             }
             $return['status'] = 1;
         } catch (\Exception $e) {
-            $return['errMsg'] =  '快递单号:' . $logisticNo . ',新建失败啊，原因:' . $e->getMessage();
+            $return['errMsg'] =  '快递单号:' . $logisticNo . ',新建失败，原因:' . $e->getMessage();
         }
         return $return;
     }
