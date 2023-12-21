@@ -179,7 +179,7 @@ class DeliveryOrderTaskController extends Controller
                         $tempOrderNo = 'TZF' . (string)time();
                         $processes = count($excelData)/1000; // 需要创建的子进程数量
                         if ($processes < 1) {
-                            $processes = 1;
+                            $processes = 2;
                         }
                         $chunks = array_chunk($excelData, ceil(count($excelData) / $processes)); // 将大数组拆分成多个小数组
                         $tempFiles = []; // 用于存储临时文件名的数组
