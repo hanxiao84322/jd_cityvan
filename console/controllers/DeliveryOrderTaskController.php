@@ -203,6 +203,7 @@ class DeliveryOrderTaskController extends Controller
                                     // 关闭文件句柄并结束子进程
                                     fclose($tempHandle);
                                     \Yii::$app->db->close();
+                                    sleep(2);
                                     exit(); // 子进程执行完任务后退出
                                 }
                             } catch (\Exception $e) {
@@ -243,6 +244,7 @@ class DeliveryOrderTaskController extends Controller
                             }
                         }
                         if ($return['errorCount'] == 0) {
+                            sleep(10);
                             $output = exec("./yii logistic-company-check-bill/run");
                             $return = json_decode($output, true);
                         }
