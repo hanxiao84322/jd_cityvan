@@ -10,6 +10,7 @@ use Yii;
  *
  * @property int $id
  * @property string $logistic_company_check_bill_no 对账单号
+ * @property string $order_type 对账单类型 1 付费 2 收费
  * @property string $warehouse_code 仓库编码
  * @property int $logistic_id 快递公司ID
  * @property string $logistic_no 快递单号
@@ -43,6 +44,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
         self::STATUS_WEIGHT_DIFF => '金额与重量差异',
     ];
 
+
     /**
      * {@inheritdoc}
      */
@@ -58,7 +60,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
     {
         return [
             [['warehouse_code', 'logistic_id', 'logistic_no', 'weight', 'price', 'status', 'create_username', 'create_time'], 'required'],
-            [['logistic_id', 'status'], 'integer'],
+            [['logistic_id', 'status', 'order_type'], 'integer'],
             [['weight', 'price', 'system_weight', 'system_price'], 'number'],
             [['note'], 'string'],
             [['create_time'], 'safe'],
@@ -75,6 +77,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'logistic_company_check_bill_no' => '对账单号',
+            'order_type' => '对账单类型',
             'warehouse_code' => '仓库编码',
             'logistic_id' => '快递公司',
             'logistic_company_name' => '快递公司',

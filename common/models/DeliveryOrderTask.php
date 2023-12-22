@@ -31,10 +31,10 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
     ];
 
     const TYPE_ORDER = 1;
-    const TYPE_LOGISTIC_COMPANY_CHECK_BILL = 2;
+    const TYPE_CHECK_BILL = 2;
     static $typeList = [
         self::TYPE_ORDER => '订单',
-        self::TYPE_LOGISTIC_COMPANY_CHECK_BILL => '对账单',
+        self::TYPE_CHECK_BILL => '对账单',
     ];
     /**
      * {@inheritdoc}

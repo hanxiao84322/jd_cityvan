@@ -97,7 +97,7 @@ Modal::end();
             const orderType = $('#order_type').val();
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
-            formData.append('type', <?php echo DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL;?>);
+            formData.append('type', <?php echo DeliveryOrderTask::TYPE_CHECK_BILL;?>);
             formData.append('order_type', orderType);
             $.ajax({
                 url: '/delivery/delivery-order-task/ajax-create',

@@ -170,7 +170,7 @@ class DeliveryOrderTaskController extends Controller
                             $return['errorList'][] = $errMsg;
                         }
                     }
-                } elseif ($task['type'] == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
+                } elseif ($task['type'] == DeliveryOrderTask::TYPE_CHECK_BILL) {
                     try {
                         $excelData = Utility::getExcelDataNewNew($task['file_path']);
                         if (empty($excelData)) {
@@ -178,6 +178,7 @@ class DeliveryOrderTaskController extends Controller
                         }
                         echo "data count:" . count($excelData) . "\r\n";
                         $tempOrderNo = 'TZF' . (string)time();
+                        $orderType = $task['order_type'];
                         $processes = count($excelData)/20000; // 每个子进程跑 20000 条数据，需要创建的子进程数量
                         if ($processes < 1) {
                             $processes = 2;
@@ -199,7 +200,7 @@ class DeliveryOrderTaskController extends Controller
                                     // 打开临时文件用于写入
                                     $tempHandle = fopen($tempFile, 'w');
                                     // 子进程代码
-                                    $result = $this->processChunk($chunks[$i], $tempOrderNo); // 执行任务并将结果存储在对应的索引位置
+                                    $result = $this->processChunk($chunks[$i], $tempOrderNo,$orderType); // 执行任务并将结果存储在对应的索引位置
                                     fwrite($tempHandle, json_encode($result) . PHP_EOL);
                                     // 关闭文件句柄并结束子进程
                                     fclose($tempHandle);
@@ -404,7 +405,7 @@ class DeliveryOrderTaskController extends Controller
                     $return['errorList'][] = $errMsg;
                 }
             }
-        } elseif ($type == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
+        } elseif ($type == DeliveryOrderTask::TYPE_CHECK_BILL) {
             $excelData = [
                 0 => [
                     0 => 'cd',
@@ -699,7 +700,7 @@ class DeliveryOrderTaskController extends Controller
                     $return['errorList'][] = $errMsg;
                 }
             }
-        } elseif ($type == DeliveryOrderTask::TYPE_LOGISTIC_COMPANY_CHECK_BILL) {
+        } elseif ($type == DeliveryOrderTask::TYPE_CHECK_BILL) {
             try {
                 $excelData = Utility::getExcelDataNewNew($filePath);
                 if (empty($excelData)) {
@@ -777,7 +778,7 @@ class DeliveryOrderTaskController extends Controller
         echo "finish";
     }
 
-    private function processChunk($chunk, $tempOrderNo)
+    private function processChunk($chunk, $tempOrderNo,$orderType)
     {
         // 这里是子进程执行的具体任务
         // 可以根据需求使用 Yii2 的组件和工具来处理任务，例如 ActiveRecord、队列组件等
@@ -787,7 +788,7 @@ class DeliveryOrderTaskController extends Controller
             // 执行任务
             foreach ($chunk as $data) {
                 // 处理数据
-                $processedRes = $this->processData($data, $tempOrderNo);
+                $processedRes = $this->processData($data, $tempOrderNo,$orderType);
                 $result[] = $processedRes;
             }
             return $result;
@@ -798,7 +799,7 @@ class DeliveryOrderTaskController extends Controller
         }
     }
 
-    private function processData($item, $tempOrderNo)
+    private function processData($item, $tempOrderNo,$orderType)
     {
         $return = [
             'status' => 0,
@@ -840,8 +841,14 @@ class DeliveryOrderTaskController extends Controller
             if (empty($logisticCompanySettlementOrderDetailModel)) {
                 $status = LogisticCompanyCheckBillDetail::STATUS_SYSTEM_NOT_SETTLEMENT;
             } else {
-                $systemWeight = $logisticCompanySettlementOrderDetailModel->weight;
-                $systemPrice = $logisticCompanySettlementOrderDetailModel->need_pay_amount;
+                if ($orderType == LogisticCompanyCheckBill::TYPE_PAY) {
+                    $systemWeight = $logisticCompanySettlementOrderDetailModel->weight;
+                    $systemPrice = $logisticCompanySettlementOrderDetailModel->need_pay_amount;
+                } else {
+                    $systemWeight = $logisticCompanySettlementOrderDetailModel->jd_weight;
+                    $systemPrice = $logisticCompanySettlementOrderDetailModel->need_receipt_amount;
+                }
+
                 if ($systemWeight != $orderWeight) {
                     $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
                     if ($systemPrice == $orderPrice) {
@@ -862,7 +869,7 @@ class DeliveryOrderTaskController extends Controller
             $logisticCompanyCheckBillDetailModel->logistic_company_check_bill_no = $tempOrderNo;
             $logisticCompanyCheckBillDetailModel->warehouse_code = $warehouseCode;
             $logisticCompanyCheckBillDetailModel->logistic_id = $logisticId;
-            $logisticCompanyCheckBillDetailModel->logistic_no = $logisticNo;
+            $logisticCompanyCheckBillDetailModel->order_type = $orderType;
             $logisticCompanyCheckBillDetailModel->weight = $orderWeight;
             $logisticCompanyCheckBillDetailModel->price = $orderPrice;
             $logisticCompanyCheckBillDetailModel->system_weight = $systemWeight;
