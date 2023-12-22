@@ -869,6 +869,7 @@ class DeliveryOrderTaskController extends Controller
             $logisticCompanyCheckBillDetailModel->logistic_company_check_bill_no = $tempOrderNo;
             $logisticCompanyCheckBillDetailModel->warehouse_code = $warehouseCode;
             $logisticCompanyCheckBillDetailModel->logistic_id = $logisticId;
+            $logisticCompanyCheckBillDetailModel->logistic_no = $logisticNo;
             $logisticCompanyCheckBillDetailModel->order_type = $orderType;
             $logisticCompanyCheckBillDetailModel->weight = $orderWeight;
             $logisticCompanyCheckBillDetailModel->price = $orderPrice;
