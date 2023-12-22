@@ -25,7 +25,8 @@ class DeliveryOrderTaskController extends Controller
      */
     public function actionRun()
     {
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '2048M');
+        set_time_limit(0);
         $ret = [
             'success' => 0,
             'msg' => '',
