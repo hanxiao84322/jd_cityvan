@@ -246,7 +246,7 @@ class DeliveryOrderTaskController extends Controller
                         }
                         if ($return['errorCount'] == 0) {
                             sleep(10);
-                            $output = exec("./yii logistic-company-check-bill/run");
+                            $output = exec("/www/wwwroot/jd_cityvan/yii logistic-company-check-bill/run");
                             $return = json_decode($output, true);
                         }
                     } catch (\Exception $e) {
@@ -445,7 +445,7 @@ class DeliveryOrderTaskController extends Controller
                             $note .= "订单状态是" . DeliveryOrder::getStatusName($deliveryOrderModel->status) . "未达到最终状态！\r\n";
                         }
                     }
-                    
+
                     $systemWeight = '';
                     $systemPrice = '';
                     $logisticCompanySettlementOrderDetailModel = LogisticCompanySettlementOrderDetail::findOne(['logistic_no' => $logisticNo]);
