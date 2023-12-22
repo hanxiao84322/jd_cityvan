@@ -177,7 +177,7 @@ class DeliveryOrderTaskController extends Controller
                         }
                         echo "data count:" . count($excelData) . "\r\n";
                         $tempOrderNo = 'TZF' . (string)time();
-                        $processes = count($excelData)/10000; // 需要创建的子进程数量
+                        $processes = count($excelData)/20000; // 每个子进程跑 20000 条数据，需要创建的子进程数量
                         if ($processes < 1) {
                             $processes = 2;
                         }
