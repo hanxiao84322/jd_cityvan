@@ -440,11 +440,12 @@ class DeliveryOrderTaskController extends Controller
                     $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode, 'logistic_no' => $logisticNo]);
                     if (empty($deliveryOrderModel)) {
                         $status = LogisticCompanyCheckBillDetail::STATUS_NOT_FOUND;
+                    } else {
+                        if (!in_array($deliveryOrderModel->status, [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED, DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE])) {
+                            $note .= "订单状态是" . DeliveryOrder::getStatusName($deliveryOrderModel->status) . "未达到最终状态！\r\n";
+                        }
                     }
-
-                    if (!in_array($deliveryOrderModel->status, [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED, DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE])) {
-                        $note .= "订单状态是" . DeliveryOrder::getStatusName($deliveryOrderModel->status) . "未达到最终状态！\r\n";
-                    }
+                    
                     $systemWeight = '';
                     $systemPrice = '';
                     $logisticCompanySettlementOrderDetailModel = LogisticCompanySettlementOrderDetail::findOne(['logistic_no' => $logisticNo]);
@@ -827,11 +828,12 @@ class DeliveryOrderTaskController extends Controller
             $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode, 'logistic_no' => $logisticNo]);
             if (empty($deliveryOrderModel)) {
                 $status = LogisticCompanyCheckBillDetail::STATUS_NOT_FOUND;
+            } else {
+                if (!in_array($deliveryOrderModel->status, [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED, DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE])) {
+                    $note .= "订单状态是" . DeliveryOrder::getStatusName($deliveryOrderModel->status) . "未达到最终状态！\r\n";
+                }
             }
 
-            if (!in_array($deliveryOrderModel->status, [DeliveryOrder::STATUS_DELIVERED, DeliveryOrder::STATUS_REPLACE_DELIVERED, DeliveryOrder::STATUS_REJECT_IN_WAREHOUSE])) {
-                $note .= "订单状态是" . DeliveryOrder::getStatusName($deliveryOrderModel->status) . "未达到最终状态！\r\n";
-            }
             $systemWeight = '';
             $systemPrice = '';
             $logisticCompanySettlementOrderDetailModel = LogisticCompanySettlementOrderDetail::findOne(['logistic_no' => $logisticNo]);
