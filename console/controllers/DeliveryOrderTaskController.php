@@ -225,7 +225,11 @@ class DeliveryOrderTaskController extends Controller
                         if (!empty($results)) {
                             foreach ($results as $re) {
                                 $reArr = json_decode($re, true);
-                                $resList = array_merge($resList, $reArr);
+                                if (!is_array($reArr)) {
+                                    $resList = array_merge($resList, $reArr);
+                                } else {
+                                    var_dump($reArr);
+                                }
                             }
                         }
                         if (!empty($resList)) {
