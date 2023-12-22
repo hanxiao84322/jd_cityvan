@@ -197,7 +197,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                         $itemLogisticNo = $deliveryOrder['logistic_no'];
                         $itemLogisticId = $deliveryOrder['logistic_id'];
                         $itemWarehouseCode = $deliveryOrder['warehouse_code'];
-                        $jdWeight = $deliveryOrder['shipping_weight']; //京东结算取包裹重量
+                        $jdWeight = $deliveryOrder['shipping_weight_rep']; //京东结算取包裹重量
                         $finishedTime = $deliveryOrder['finish_time'];
 
                         $province = $deliveryOrder['province'];
