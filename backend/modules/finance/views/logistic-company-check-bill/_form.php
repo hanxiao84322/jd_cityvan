@@ -15,7 +15,7 @@ use yii\widgets\DetailView;
         'attributes' => [
             'logistic_company_check_bill_no',
             [
-                'attribute' => 'logistic_id',
+                'label' => '快递公司',
                 'value' =>
                     function ($model) {
                         return \common\models\LogisticCompany::getNameById($model->logistic_id);
@@ -23,7 +23,7 @@ use yii\widgets\DetailView;
             ],
             'warehouse_code',
             [
-                'header' => '类型',
+                'label' => '类型',
                 'value' => function ($model) {
                     return \common\models\LogisticCompanyCheckBill::getTypeName($model->type);
                 }

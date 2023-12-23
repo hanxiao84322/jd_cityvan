@@ -148,8 +148,8 @@ use yii\widgets\ActiveForm;
 <?php $form = ActiveForm::begin([
     'method' => 'post',
 ]); ?>
-<p><?= Html::textInput('amount', '', ['id' => 'adjust_amount']) ?></p>
-<p><?= Html::textarea('content', '', ['id' => 'adjust_content']) ?></p>
+<p>金额：<?= Html::textInput('amount', '', ['id' => 'adjust_amount']) ?></p>
+<p>说明：<?= Html::textarea('content', '', ['id' => 'adjust_content']) ?></p>
 <?= Html::button('保存', ['class' => 'btn btn-primary', 'id' => 'create_adjust_term']) ?>
 <p style="margin-top: 20px" id="message">
 </p>

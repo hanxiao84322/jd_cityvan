@@ -89,14 +89,21 @@ class LogisticCompanySettlementOrderController extends Controller
             if ($logisticCompanySettlementOrderExists) {
                 throw new \Exception('该对账单已经创建过结算单了，结算单号:' . $logisticCompanySettlementOrderExists->settlement_order_no);
             }
+
             $model = new LogisticCompanySettlementOrder();
             $model->settlement_order_no = LogisticCompanySettlementOrder::generateId();
             $model->logistic_company_check_bill_no = $logisticCompanyCheckBillModel->logistic_company_check_bill_no;
             $model->logistic_id = $logisticCompanyCheckBillModel->logistic_id;
             $model->warehouse_code = $logisticCompanyCheckBillModel->warehouse_code;
             $model->order_num = $logisticCompanyCheckBillModel->system_order_num;
-            $model->need_pay_amount = $logisticCompanyCheckBillModel->system_order_price;
-            $model->need_receipt_amount = 0;
+            if ($logisticCompanyCheckBillModel->type == LogisticCompanyCheckBill::TYPE_PAY) {
+                $model->need_pay_amount = $logisticCompanyCheckBillModel->system_order_price;
+                $model->need_receipt_amount = 0;
+            } else {
+                $model->need_receipt_amount = $logisticCompanyCheckBillModel->system_order_price;
+                $model->need_pay_amount = 0;
+            }
+
             $model->expect_amount = $logisticCompanyCheckBillModel->system_order_price;
             $model->type = $logisticCompanyCheckBillModel->type;
             $model->date = date('Y-m-d', time());

@@ -53,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'order_num',
             'need_amount',
             'need_pay_amount',
+            'need_receipt_amount',
             'adjust_amount',
             'preferential_amount',
             [
