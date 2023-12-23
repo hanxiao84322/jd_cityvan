@@ -19,7 +19,6 @@ use yii\helpers\Json;
 class DeliveryOrderTaskController extends Controller
 {
 
-
     /**
      * ./yii delivery-order-task/run
      */
@@ -27,6 +26,7 @@ class DeliveryOrderTaskController extends Controller
     {
         ini_set('memory_limit', '2048M');
         set_time_limit(0);
+        date_default_timezone_set("Asia/Shanghai");
         $ret = [
             'success' => 0,
             'msg' => '',
@@ -582,7 +582,7 @@ class DeliveryOrderTaskController extends Controller
         ];
 
         $type = 2;
-        $filePath = './1.xlsx';
+        $filePath = './22.xlsx';
 
         echo "file verify success, begin import\r\n";
         $return = [
@@ -704,12 +704,15 @@ class DeliveryOrderTaskController extends Controller
             try {
                 $excelData = Utility::getExcelDataNewNew($filePath);
                 if (empty($excelData)) {
-                    throw new \Exception('data is empty');
+                    throw new \Exception('数据为空');
                 }
                 echo "data count:" . count($excelData) . "\r\n";
                 $tempOrderNo = 'TZF' . (string)time();
-                $result = []; // 存储最终结果的数组
-                $processes = 2; // 需要创建的子进程数量
+                $orderType = 2;
+                $processes = count($excelData)/20000; // 每个子进程跑 20000 条数据，需要创建的子进程数量
+                if ($processes < 1) {
+                    $processes = 2;
+                }
                 $chunks = array_chunk($excelData, ceil(count($excelData) / $processes)); // 将大数组拆分成多个小数组
                 $tempFiles = []; // 用于存储临时文件名的数组
                 // 创建指定数量的子进程
@@ -727,22 +730,22 @@ class DeliveryOrderTaskController extends Controller
                             // 打开临时文件用于写入
                             $tempHandle = fopen($tempFile, 'w');
                             // 子进程代码
-                            $result = $this->processChunk($chunks[$i], $tempOrderNo); // 执行任务并将结果存储在对应的索引位置
+                            $result = $this->processChunk($chunks[$i], $tempOrderNo,$orderType); // 执行任务并将结果存储在对应的索引位置
                             fwrite($tempHandle, json_encode($result) . PHP_EOL);
                             // 关闭文件句柄并结束子进程
                             fclose($tempHandle);
                             \Yii::$app->db->close();
+                            sleep(2);
                             exit(); // 子进程执行完任务后退出
                         }
-
                     } catch (\Exception $e) {
-                        echo $e->getMessage() . "\r\n";
+                        $ret['msg'] = $e->getMessage();
                     }
                 }
                 // 等待子进程完成，并获取结果
                 for ($i = 1; $i <= $processes; $i++) {
                     pcntl_wait($status);
-                    echo "sub process {$i} is finish job：" . print_r($result, true) . "\n";
+                    echo "sub process {$i} is finish job\r\n";
                 }
                 $results = [];
                 if (!empty($tempFiles)) {
@@ -755,7 +758,11 @@ class DeliveryOrderTaskController extends Controller
                 if (!empty($results)) {
                     foreach ($results as $re) {
                         $reArr = json_decode($re, true);
-                        $resList = array_merge($resList, $reArr);
+                        if (is_array($reArr)) {
+                            $resList = array_merge($resList, $reArr);
+                        } else {
+                            var_dump($reArr);
+                        }
                     }
                 }
                 if (!empty($resList)) {
@@ -768,13 +775,19 @@ class DeliveryOrderTaskController extends Controller
                         }
                     }
                 }
-                print_r($return);
-                $output = exec("./yii logistic-company-check-bill/run");
-                var_dump($output);exit;
+                if ($return['errorCount'] == 0) {
+                    sleep(10);
+                    $output = exec("./yii logistic-company-check-bill/run");
+                    $return = json_decode($output, true);
+                }
             } catch (\Exception $e) {
-                echo $e->getMessage();
+                $ret['msg'] = $e->getMessage();
             }
         }
+        $return['errorList'] = !empty($return['errorList']) ? join("|", $return['errorList']) : '';
+        $ret['success'] = 1;
+        $ret['return'] = $return;
+        print_r($ret);exit;
         echo "finish";
     }
 
