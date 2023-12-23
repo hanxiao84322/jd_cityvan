@@ -272,7 +272,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                         if (!$logisticCompanySettlementOrderDetailModel->save()) {
                             throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . "快递单号：" . $itemLogisticNo . "更新快递公司结算单明细失败，原因:" . Utility::arrayToString($logisticCompanySettlementOrderDetailModel->getErrors()));
                         } else {
-                            DeliveryOrder::updateAll(['order_total_price' => $fee], ['logistic_no' => $itemLogisticNo]); //更新京东收取费用
+                            DeliveryOrder::updateAll(['total_price' => $fee], ['logistic_no' => $itemLogisticNo]); //更新京东收取费用
                         }
                         echo "success\r\n";
                     } catch (\Exception $e) {
