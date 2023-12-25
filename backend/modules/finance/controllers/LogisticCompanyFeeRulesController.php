@@ -164,7 +164,7 @@ class LogisticCompanyFeeRulesController extends Controller
                 $model->loadDefaultValues();
             }
 
-            return $this->render('create', [
+            return $this->render('update', [
                 'model' => $model,
             ]);
         } catch (\Exception $e) {
