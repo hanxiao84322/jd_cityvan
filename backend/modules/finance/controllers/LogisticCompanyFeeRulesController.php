@@ -152,24 +152,21 @@ class LogisticCompanyFeeRulesController extends Controller
                 $model->district = Cnarea::getNameByCode($model->district_code);
 
                 $model->continue_weight_rule = json_encode($continueWeightRule);
-                $model->create_username = \Yii::$app->user->getIdentity()['username'];
-                $model->create_time = date('Y-m-d H:i:s', time());
+                $model->update_username = \Yii::$app->user->getIdentity()['username'];
+                $model->update_time = date('Y-m-d H:i:s', time());
                 if ($model->save()) {
-                    \Yii::$app->session->setFlash('success', '新建运费成功!');
+                    \Yii::$app->session->setFlash('success', '修改运费成功!');
                     return $this->redirect(['view', 'id' => $model->id]);
                 } else {
                     throw new \Exception(Utility::arrayToString($model->getErrors()));
                 }
-            } else {
-                $model->loadDefaultValues();
             }
 
             return $this->render('update', [
                 'model' => $model,
             ]);
         } catch (\Exception $e) {
-            \Yii::$app->session->set('formData', \Yii::$app->request->post());
-            \Yii::$app->session->setFlash('error', '新建运费失败，原因：' . $e->getMessage() . '!');
+            \Yii::$app->session->setFlash('error', '修改运费失败，原因：' . $e->getMessage() . '!');
             return $this->redirect(['update']);
         }
     }

@@ -69,7 +69,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
             [['create_time', 'update_time'], 'safe'],
             [['warehouse_code'], 'string', 'max' => 20],
             [['province', 'city', 'district', 'province_code', 'city_code', 'district_code', 'create_username', 'update_username'], 'string', 'max' => 50],
-            [['type', 'warehouse_code', 'logistic_id', 'province', 'city', 'district'], 'unique', 'targetAttribute' => ['warehouse_code', 'logistic_id', 'province', 'city', 'district']],
+            [['type', 'warehouse_code', 'logistic_id', 'province', 'city', 'district'], 'unique', 'targetAttribute' => ['type', 'warehouse_code', 'logistic_id', 'province', 'city', 'district']],
         ];
     }
 
