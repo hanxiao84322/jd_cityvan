@@ -101,7 +101,9 @@ class LogisticCompanySettlementDetailsController extends Controller
                             default:
                                 break;
                         }
+
                         $fee = $logisticCompanyFeeRulesResult['price'];
+
                         if ($weight > $logisticCompanyFeeRulesResult['weight']) {
                             $continueWeight = $weight - $logisticCompanyFeeRulesResult['weight'];
                             $continueWeightRule = json_decode($logisticCompanyFeeRulesResult['continue_weight_rule'], true);
@@ -115,6 +117,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                                     $fee += $value[2];
                                 }
                             }
+
                             if (!$hasContinueWeightRule) {
                                 throw new \Exception("快递公司ID：" . $itemLogisticId . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . "快递单号：" . $itemLogisticNo . "，重量：" . $weight . ",首重：" . $logisticCompanyFeeRulesResult['weight'] . ",续重：" . $continueWeight . ",没有对应的续重规则");
                             }

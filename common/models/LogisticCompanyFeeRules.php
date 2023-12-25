@@ -115,16 +115,13 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public static function getContinueWeightRoundRuleView($continueWeightRoundRule) {
         $continueWeightRoundRuleText = '';
         $continueWeightRoundRuleArr = json_decode($continueWeightRoundRule, true);
-
-        foreach ($continueWeightRoundRuleArr as $key => $item) {
-            if (!empty($item[0])) {
+            foreach ($continueWeightRoundRuleArr as $key => $item) {
                 if (empty($item[1])) {
                     $continueWeightRoundRuleText .= "第" . $key + 1 . "阶-大于:" . $item[0] .",价格(元):" . $item['2'] . "<br>";
                 } else {
                     $continueWeightRoundRuleText .= "第" . $key + 1 . "阶-起始重量:" . $item[0] . ",结束重量:" . $item['1'] . ",价格(元):" . $item['2'] . "<br>";
 
                 }
-            }
 
         }
 

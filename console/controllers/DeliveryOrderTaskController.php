@@ -196,9 +196,9 @@ class DeliveryOrderTaskController extends Controller
                                 } else {
                                     \Yii::$app->db->close(); // Close the connection if opened
                                     \Yii::$app->db->open();  // Reopen the connection
-                                    $tempFile = "temp_file_" . getmypid() . ".txt";
-                                    // 打开临时文件用于写入
-                                    $tempHandle = fopen($tempFile, 'w');
+                                        $tempFile = "temp_file_" . getmypid() . ".txt";
+                                        // 打开临时文件用于写入
+                                        $tempHandle = fopen($tempFile, 'w');
                                     // 子进程代码
                                     $result = $this->processChunk($chunks[$i], $tempOrderNo,$orderType); // 执行任务并将结果存储在对应的索引位置
                                     fwrite($tempHandle, json_encode($result) . PHP_EOL);

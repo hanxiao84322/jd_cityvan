@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = ['label' => '快递公司运费列表', 'url' =
             'price',
             [
                 'format' => 'raw',
-                'label' => '快递公司',
+                'label' => '续重规则',
                 'value' =>
                     function ($model) {
                         return \common\models\LogisticCompanyFeeRules::getContinueWeightRoundRuleView($model->continue_weight_rule);

@@ -133,6 +133,7 @@ class LogisticCompanyFeeRulesController extends Controller
         try {
             $model = $this->findModel($id);
             $model->continue_weight_rule = LogisticCompanyFeeRules::getContinueWeightRoundRuleText($model->continue_weight_rule);
+
             if ($this->request->isPost) {
                 $post = $this->request->post();
                 $model->load($post);
