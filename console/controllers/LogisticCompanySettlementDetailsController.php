@@ -98,6 +98,9 @@ class LogisticCompanySettlementDetailsController extends Controller
                             case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_UP:
                                 $weight = ceil($weight);
                                 break;
+                            case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_NOT:
+                                $weight = $weight;
+                                break;
                             default:
                                 break;
                         }
@@ -226,22 +229,24 @@ class LogisticCompanySettlementDetailsController extends Controller
                                 }
                             }
                         }
-                        switch ($logisticCompanyFeeRulesResult['weight_round_rule']) {
-                            case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_NOT_UP:
-                                $jdWeight = intval($jdWeight);
-                                break;
-                            case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_HALF_UP:
-                                $jdWeight = round($jdWeight);
-                                break;
-                            case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_UP:
-                                $jdWeight = ceil($jdWeight);
-                                break;
-                            default:
-                                break;
-                        }
                         $fee = $logisticCompanyFeeRulesResult['price'];
+
                         if ($jdWeight > $logisticCompanyFeeRulesResult['weight']) {
                             $continueWeight = $jdWeight - $logisticCompanyFeeRulesResult['weight'];
+                            switch ($logisticCompanyFeeRulesResult['weight_round_rule']) {
+                                case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_NOT_UP:
+                                    $continueWeight = intval($continueWeight);
+                                    break;
+                                case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_HALF_UP:
+                                    $continueWeight = round($continueWeight);
+                                    break;
+                                case LogisticCompanyFeeRules::WEIGHT_ROUND_RULE_UP:
+                                    $continueWeight = ceil($continueWeight);
+                                    break;
+                                default:
+                                    $continueWeight = $continueWeight;
+                                    break;
+                            }
                             $continueWeightRule = json_decode($logisticCompanyFeeRulesResult['continue_weight_rule'], true);
                             if (empty($continueWeightRule)) {
                                 throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . "快递单号：" . $itemLogisticNo . "，重量：" . $jdWeight . ",首重：" . $logisticCompanyFeeRulesResult['weight'] . ",续重：" . $continueWeight . ",没有对应的续重规则");
@@ -250,14 +255,17 @@ class LogisticCompanySettlementDetailsController extends Controller
                             foreach ($continueWeightRule as $value) {
                                 if (($continueWeight >= $value[0] && $continueWeight < $value[1]) || ($continueWeight >= $value[0] && empty($value[1]))) {
                                     $hasContinueWeightRule = true;
-                                    $fee += $value[2];
+                                    if ($logisticCompanyFeeRulesResult['continue_count_rule'] == LogisticCompanyFeeRules::CONTINUE_COUNT_RULE_ADDITION) {
+                                        $fee += $value[2];
+                                    } else {
+                                        $fee = $fee + ($continueWeight * $value[2]);
+                                    }
                                 }
                             }
                             if (!$hasContinueWeightRule) {
                                 throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . "快递单号：" . $itemLogisticNo . "，重量：" . $jdWeight . ",首重：" . $logisticCompanyFeeRulesResult['weight'] . ",续重：" . $continueWeight . ",没有对应的续重规则");
                             }
                         }
-
                         $logisticCompanySettlementOrderDetailModel = LogisticCompanySettlementOrderDetail::findOne(['logistic_no' => $itemLogisticNo, 'logistic_id' => $itemLogisticId]);
                         if (!$logisticCompanySettlementOrderDetailModel) {
                             $logisticCompanySettlementOrderDetailModel = new LogisticCompanySettlementOrderDetail();

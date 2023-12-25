@@ -34,9 +34,12 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'weight', ['options' => ['class' => 'col-xs-3']])->textInput(['maxlength' => true])->label('首重(公斤)') ?>
 </div>
 <div class="row">
-    <?= $form->field($model, 'weight_round_rule', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$weightRoundRuleList)->label('订单重量取整规则') ?>
-
+    <?= $form->field($model, 'weight_round_rule', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$weightRoundRuleList)->label('续重取整规则') ?>
 </div>
+<div class="row" id="input_amount_input" style="display: <?php if ($model->type == \common\models\LogisticCompanyFeeRules::TYPE_WAREHOUSE) {?> block <?php } else {?>none<?php } ?>;">
+    <?= $form->field($model, 'continue_count_rule', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$continueCountList)->label('续重计算规则') ?>
+</div>
+
 <div class="row">
     <?= $form->field($model, 'price', ['options' => ['class' => 'col-xs-3']])->textInput(['maxlength' => true])->label('首重价格(元)') ?>
 </div>
@@ -109,7 +112,16 @@ use yii\widgets\ActiveForm;
             });
 
         });
+        $('#logisticcompanyfeerules-type').change(function () {
+            const diff_adjust_plan = $('#logisticcompanyfeerules-type').val();
 
+            if (diff_adjust_plan == 2) {
+                $('#input_amount_input').css('display', 'block');
+            } else {
+                $('#input_amount_input').css('display', 'none');
+            }
+
+        });
     });
     <?php if (!$model->isNewRecord) {?>
     $(document).ready(function () {

@@ -22,6 +22,7 @@ use Yii;
  * @property float $price 首重价格元
  * @property string $continue_weight_rule 续重规则
  * @property int $continue_weight_round_rule 续重取整规则
+ * @property int $continue_count_rule 续重计算规则
  * @property string $create_username 创建人用户名
  * @property string $create_time 创建时间
  * @property string $update_username 更新人用户名
@@ -34,11 +35,13 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     const WEIGHT_ROUND_RULE_NOT_UP = 1;
     const WEIGHT_ROUND_RULE_HALF_UP = 2;
     const WEIGHT_ROUND_RULE_UP = 3;
+    const WEIGHT_ROUND_RULE_NOT = 4;
 
     public static $weightRoundRuleList = [
         self::WEIGHT_ROUND_RULE_HALF_UP => '四舍五入',
         self::WEIGHT_ROUND_RULE_NOT_UP => '只舍不入',
         self::WEIGHT_ROUND_RULE_UP => '全入不舍',
+        self::WEIGHT_ROUND_RULE_NOT => '不舍也不入',
     ];
 
     const TYPE_LOGISTIC = 1;
@@ -46,6 +49,14 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public static  $typeList = [
         self::TYPE_LOGISTIC => '快递公司',
         self::TYPE_WAREHOUSE => '客户仓库',
+    ];
+
+    const CONTINUE_COUNT_RULE_ADDITION = 1;
+    const CONTINUE_COUNT_RULE_MULTIPLY = 2;
+
+    public static $continueCountList = [
+        self::CONTINUE_COUNT_RULE_ADDITION => '相加',
+        self::CONTINUE_COUNT_RULE_MULTIPLY => '相乘',
     ];
 
     /**
@@ -63,7 +74,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     {
         return [
             [['warehouse_code', 'logistic_id', 'province_code', 'weight', 'weight_round_rule', 'price', 'continue_weight_rule', 'type'], 'required'],
-            [['logistic_id', 'weight_round_rule', 'continue_weight_round_rule', 'type'], 'integer'],
+            [['logistic_id', 'weight_round_rule', 'continue_count_rule', 'continue_weight_round_rule', 'type'], 'integer'],
             [['weight', 'price'], 'number'],
             [['continue_weight_rule'], 'string'],
             [['create_time', 'update_time'], 'safe'],
@@ -136,6 +147,11 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public static function getTypeName($type)
     {
         return isset(self::$typeList[$type]) ? self::$typeList[$type] : '无';
+    }
+
+    public static function getContinueCountRule($continueCountRule)
+    {
+        return isset(self::$continueCountList[$continueCountRule]) ? self::$continueCountList[$continueCountRule] : '无';
     }
 
 }

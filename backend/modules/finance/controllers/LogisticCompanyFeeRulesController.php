@@ -116,7 +116,7 @@ class LogisticCompanyFeeRulesController extends Controller
         } catch (\Exception $e) {
             \Yii::$app->session->set('formData', \Yii::$app->request->post());
             \Yii::$app->session->setFlash('error', '新建调整单失败，原因：' . $e->getMessage() . '!');
-            return $this->redirect(['create']);
+            return $this->redirect(['index']);
         }
 
     }

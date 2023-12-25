@@ -43,10 +43,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'district',
             'weight',
             [
-                'label' => '订单重量取整规则',
+                'label' => '续重取整规则',
                 'value' =>
                     function ($model) {
                         return \common\models\LogisticCompanyFeeRules::getWeightRoundRule($model->weight_round_rule);
+                    },
+            ],
+            [
+                'label' => '续重计算规则',
+                'value' =>
+                    function ($model) {
+                        return \common\models\LogisticCompanyFeeRules::getContinueCountRule($model->continue_count_rule);
                     },
             ],
             'price',

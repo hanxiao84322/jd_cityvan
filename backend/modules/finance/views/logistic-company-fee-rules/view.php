@@ -28,10 +28,17 @@ $this->params['breadcrumbs'][] = ['label' => '快递公司运费列表', 'url' =
             'district',
             'weight',
             [
-                'label' => '首重取整规则',
+                'label' => '续重取整规则',
                 'value' =>
                     function ($model) {
                         return \common\models\LogisticCompanyFeeRules::getWeightRoundRule($model->weight_round_rule);
+                    },
+            ],
+            [
+                'label' => '续重计算规则',
+                'value' =>
+                    function ($model) {
+                        return \common\models\LogisticCompanyFeeRules::getContinueCountRule($model->continue_count_rule);
                     },
             ],
             'price',
@@ -41,13 +48,6 @@ $this->params['breadcrumbs'][] = ['label' => '快递公司运费列表', 'url' =
                 'value' =>
                     function ($model) {
                         return \common\models\LogisticCompanyFeeRules::getContinueWeightRoundRuleView($model->continue_weight_rule);
-                    },
-            ],
-            [
-                'label' => '续重取整规则',
-                'value' =>
-                    function ($model) {
-                        return \common\models\LogisticCompanyFeeRules::getWeightRoundRule($model->continue_weight_round_rule);
                     },
             ],
             'create_username',
