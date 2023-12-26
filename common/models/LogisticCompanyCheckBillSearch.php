@@ -73,7 +73,7 @@ class LogisticCompanyCheckBillSearch extends LogisticCompanyCheckBill
             $this->create_time_start = date('Y-m-d', strtotime('-1 day'));
         }
         if (empty($this->create_time_end)) {
-            $this->create_time_end = date('Y-m-d', time());
+            $this->create_time_end = date('Y-m-d', strtotime('+1 day'));
         }
         $query->andWhere(['>=', 'lccb.create_time', $this->create_time_start]);
         $query->andWhere(['<=', 'lccb.create_time', $this->create_time_end]);
