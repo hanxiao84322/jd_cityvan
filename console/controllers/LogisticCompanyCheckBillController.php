@@ -46,7 +46,7 @@ class LogisticCompanyCheckBillController extends Controller
                 foreach ($logisticCompanyCheckBillResult as $value) {
                     try {
                         $logisticCompanyCheckBillModel = new LogisticCompanyCheckBill();
-                        $logisticCompanyCheckBillModel->logistic_company_check_bill_no = LogisticCompanyCheckBill::generateId();
+                        $logisticCompanyCheckBillModel->logistic_company_check_bill_no = LogisticCompanyCheckBill::generateId($value['order_type']);
                         $logisticCompanyCheckBillModel->logistic_id = $value['logistic_id'];
                         $logisticCompanyCheckBillModel->warehouse_code = $value['warehouse_code'];;
                         $logisticCompanyCheckBillModel->date = date('Y-m-d', time());

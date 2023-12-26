@@ -95,10 +95,15 @@ class LogisticCompanyCheckBill extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function generateId()
+    public static function generateId($type)
     {
         $lasted = self::find()->limit(1)->orderBy('create_time desc')->asArray()->one();
-        $p = "ZF" . date('ymd');
+        if ($type == self::TYPE_PAY) {
+            $orderType = 3;
+        } else {
+            $orderType = 1;
+        }
+        $p = "ZF" . $orderType. date('ymd');
         if ($lasted && strstr($lasted['logistic_company_check_bill_no'], $p)) {
             $last_id = $lasted['logistic_company_check_bill_no'];
             $count = intval(substr($last_id, strlen($last_id) - 4));

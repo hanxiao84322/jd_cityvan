@@ -74,7 +74,7 @@ Modal::begin([
 </p>
 <p><?= Html::a('模板下载', ['download-template'], ['class' => 'btn btn-success']) ?>
 </p>
-<p><?= Html::button('导入', ['class' => 'btn btn-primary', 'id' => 'upload-btn']) ?>&nbsp;&nbsp;&nbsp;<?= Html::button('导入（后台执行）', ['class' => 'btn btn-primary', 'id' => 'task-create']) ?>&nbsp;&nbsp;&nbsp;<?= Html::button('关闭', ['class' => 'btn btn-close', 'id' => 'close-btn']) ?></p>
+<p><?= Html::button('导入（后台执行）', ['class' => 'btn btn-primary', 'id' => 'task-create']) ?>&nbsp;&nbsp;&nbsp;<?= Html::button('关闭', ['class' => 'btn btn-close', 'id' => 'close-btn']) ?></p>
 
 <p style="margin-top: 20px" id="message">
 </p>
