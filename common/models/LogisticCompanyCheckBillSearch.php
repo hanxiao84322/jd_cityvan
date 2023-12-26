@@ -70,10 +70,10 @@ class LogisticCompanyCheckBillSearch extends LogisticCompanyCheckBill
             'lccb.logistic_company_check_bill_no' => $this->logistic_company_check_bill_no,
         ]);
         if (empty($this->create_time_start)) {
-            $this->create_time_start = date('Y-m-d 00:00:00', time());
+            $this->create_time_start = date('Y-m-d', strtotime('-1 day'));
         }
         if (empty($this->create_time_end)) {
-            $this->create_time_end = date('Y-m-d 23:59:59', time());
+            $this->create_time_end = date('Y-m-d', time());
         }
         $query->andWhere(['>=', 'lccb.create_time', $this->create_time_start]);
         $query->andWhere(['<=', 'lccb.create_time', $this->create_time_end]);

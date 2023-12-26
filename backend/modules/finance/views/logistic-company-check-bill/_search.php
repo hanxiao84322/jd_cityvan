@@ -27,16 +27,13 @@ use kartik\datetime\DateTimePicker;
 
     </div>
     <div class="row">
-        <?= $form->field($model, 'create_time_start',['options' => ['class' => 'col-xs-3']])->widget(DateTimePicker::classname(), [
-            'options' => ['placeholder' => date('Y-m-d 00:00:00', time())],
-            'value' => date('Y-m-d 00:00:00', time()),
-            'pluginOptions' => ['autoclose' => true, 'todayHighlight' => true]
-        ])->label('创建时间开始');?>
-        <?= $form->field($model, 'create_time_end',['options' => ['class' => 'col-xs-3']])->widget(DateTimePicker::classname(), [
-            'options' => ['placeholder' => date('Y-m-d 23:59:59', time())],
-            'value' => date('Y-m-d 23:59:59', time()),
-            'pluginOptions' => ['autoclose' => true, 'todayHighlight' => true]
-        ])->label('创建时间结束');?>
+        <?= $form->field($model, 'create_time_start', ['options' => ['class' => 'col-xs-3', 'id' => 'create_time_start']])->widget(\kartik\datetime\DateTimePicker::classname(), [
+            'value' => $model->create_time_start,
+            'pluginOptions' => ['autoclose' => true, 'todayHighlight' => true, 'todayBtn' => true, 'format' => 'yyyy-mm-dd', 'minView' => 2]
+        ])->label('开始日期'); ?>
+        <?= $form->field($model, 'create_time_end', ['options' => ['class' => 'col-xs-3', 'id' => 'create_time_end']])->widget(\kartik\datetime\DateTimePicker::classname(), [
+            'value' => $model->create_time_end,
+            'pluginOptions' => ['autoclose' => true, 'todayHighlight' => true, 'todayBtn' => true, 'format' => 'yyyy-mm-dd', 'minView' => 2]])->label('结束日期'); ?>
         <?= $form->field($model, 'status', ['options' => ['class' => 'col-xs-3']])->label('状态')->dropDownList(\common\models\LogisticCompanyCheckBill::$statusList, ['prompt' => '---全部---']) ?>
 
     </div>

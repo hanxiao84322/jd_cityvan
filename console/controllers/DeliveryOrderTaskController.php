@@ -873,7 +873,7 @@ class DeliveryOrderTaskController extends Controller
                 }
             }
 
-            $logisticCompanyCheckBillDetailExists = LogisticCompanyCheckBillDetail::findOne(['logistic_no' => $logisticNo]);
+            $logisticCompanyCheckBillDetailExists = LogisticCompanyCheckBillDetail::findOne(['logistic_no' => $logisticNo, 'order_type' => $orderType]);
             if (!empty($logisticCompanyCheckBillDetailExists)) {
                 $status = LogisticCompanyCheckBillDetail::STATUS_EXISTS;
                 $note = '对账单号：' . $logisticCompanyCheckBillDetailExists->logistic_company_check_bill_no;
