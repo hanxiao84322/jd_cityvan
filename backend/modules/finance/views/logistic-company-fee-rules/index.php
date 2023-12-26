@@ -10,7 +10,7 @@ use yii\grid\GridView;
 /** @var common\models\LogisticCompanyFeeRulesSearch $searchModel */
 /** @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = '快递公司运费列表';
+$this->title = '运费规则列表';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="logistic-company-fee-rules-index">

@@ -6,8 +6,8 @@ use yii\widgets\DetailView;
 /** @var yii\web\View $this */
 /** @var common\models\LogisticCompanyFeeRules $model */
 
-$this->title = '快递公司运费详情';
-$this->params['breadcrumbs'][] = ['label' => '快递公司运费列表', 'url' => ['index']];
+$this->title = '运费规则详情';
+$this->params['breadcrumbs'][] = ['label' => '运费规则列表', 'url' => ['index']];
 \yii\web\YiiAsset::register($this);
 ?>
 <div class="logistic-company-fee-rules-view">
