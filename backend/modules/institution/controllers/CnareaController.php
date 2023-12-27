@@ -143,11 +143,16 @@ class CnareaController extends Controller
     public function actionAjaxGetList()
     {
         $areaCode = \Yii::$app->request->get('area_code');
+        $selectCode = \Yii::$app->request->get('select_code');
         $areaList = Cnarea::find()->where(['parent_code' => $areaCode])->asArray()->all();
         $return['status'] = 1;
         $html = '';
         foreach ($areaList as $area) {
-            $html .= '<option value="' . $area['area_code'] . '">' . $area['name'] . '</option>';
+            if ($selectCode == $area['area_code']) {
+                $html .= '<option value="' . $area['area_code'] . '" selected>' . $area['name'] . '</option>';
+            } else {
+                $html .= '<option value="' . $area['area_code'] . '">' . $area['name'] . '</option>';
+            }
         }
         $return['data'] = $html;
 

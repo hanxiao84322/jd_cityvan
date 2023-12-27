@@ -185,7 +185,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
     {
         return [
             [['logistic_id', 'sec_logistic_id', 'shipping_num', 'status', 'is_batch_update', 'is_delay', 'is_agent_settle', 'is_customer_settle', 'is_logistic_company_settle', 'is_unusual', 'is_deduction', 'is_retention', 'is_serious_retention', 'is_overdue', 'timeliness'], 'integer'],
-            [['order_weight', 'order_weight_rep', 'shipping_weight', 'shipping_weight_rep', 'post_office_weight', 'order_total_price', 'total_price'], 'number'],
+            [['order_weight', 'order_weight_rep', 'shipping_weight', 'shipping_weight_rep', 'post_office_weight', 'order_total_price', 'total_price', 'split_total_price'], 'number'],
             [['jd_send_time', 'send_time', 'receive_time', 'package_collection_time', 'transporting_time', 'transported_time', 'delivering_time', 'allocation_time', 'delivered_time', 'replace_delivered_time', 'reject_time', 'reject_in_warehouse_time', 'finish_time', 'estimate_time', 'latest_track_time', 'create_time', 'update_time'], 'safe'],
             [['logistic_no', 'warehouse_code', 'shipping_no'], 'string', 'max' => 50],
             [['order_no', 'sec_order_no', 'village', 'truck_classes_no', 'create_name', 'update_name'], 'string', 'max' => 20],
@@ -491,6 +491,12 @@ class DeliveryOrder extends \yii\db\ActiveRecord
     public static function getPostOfficeWeight($logisticNo)
     {
         return self::find()->select('post_office_weight')->where(['logistic_no' => $logisticNo])->scalar();
+    }
+
+    public static function getCdJdWeightByOrderNo($orderNo)
+    {
+        return self::find()->select('count(*) as shipping_num, sum(shipping_weight_rep) as total_jd_weight')->where(['order_no' => $orderNo])->column();
+
     }
 
 }

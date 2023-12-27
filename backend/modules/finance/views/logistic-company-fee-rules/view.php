@@ -15,6 +15,13 @@ $this->params['breadcrumbs'][] = ['label' => '运费规则列表', 'url' => ['in
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
+            [
+                'label' => '类型',
+                'value' =>
+                    function ($model) {
+                        return \common\models\LogisticCompanyFeeRules::getTypeName($model->type);
+                    },
+            ],
             'warehouse_code',
             [
                 'label' => '快递公司',

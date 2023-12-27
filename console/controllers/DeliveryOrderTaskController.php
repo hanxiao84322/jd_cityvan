@@ -150,7 +150,7 @@ class DeliveryOrderTaskController extends Controller
                             $deliveryOrderModel->shipping_weight_rep = $shippingWeightRep;
                             $deliveryOrderModel->post_office_weight = $postOfficeWeight;
                             $deliveryOrderModel->receiver_name = $receiverName;
-                            $deliveryOrderModel->receiver_address = $receiverAddress;
+                            $deliveryOrderModel->receiver_address = str_replace('"', '', (str_replace("'", "", $receiverAddress)));
                             $deliveryOrderModel->receiver_phone = $receiverPhone;
                             $deliveryOrderModel->province = $province;
                             $deliveryOrderModel->city = $city;

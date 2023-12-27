@@ -14,21 +14,43 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
     <div class="row">
+        <?php if (!$model->isNewRecord) {?>
+        <?= $form->field($model, 'type', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$typeList, ['disabled' => 'disabled'])->label('类型'); ?>
+        <?php } else {?>
         <?= $form->field($model, 'type', ['options' => ['class' => 'col-xs-3']])->dropDownList(\common\models\LogisticCompanyFeeRules::$typeList)->label('类型'); ?>
+        <?php }?>
     </div>
     <div class="row">
-        <?= $form->field($model, 'logistic_id', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\LogisticCompany::getAll(), 'id', 'company_name'), ['prompt' => '---全选---'])->label('快递公司'); ?>
+        <?php if (!$model->isNewRecord) {?>
+            <?= $form->field($model, 'logistic_id', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\LogisticCompany::getAll(), 'id', 'company_name'), ['prompt' => '---全选---','disabled' => 'disabled'])->label('快递公司'); ?>
+        <?php } else {?>
+            <?= $form->field($model, 'logistic_id', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\LogisticCompany::getAll(), 'id', 'company_name'), ['prompt' => '---全选---'])->label('快递公司'); ?>
+
+        <?php }?>
     </div>
     <div class="row">
+        <?php if (!$model->isNewRecord) {?>
+        <?= $form->field($model, 'warehouse_code', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Warehouse::getAll(), 'code', 'name'), ['prompt' => '---全选---','disabled' => 'disabled'])->label('仓库'); ?>
+        <?php } else {?>
         <?= $form->field($model, 'warehouse_code', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Warehouse::getAll(), 'code', 'name'), ['prompt' => '---全选---'])->label('仓库'); ?>
+        <?php }?>
+
 
     </div>
+    <?php if (!$model->isNewRecord) {?>
+
     <div class="row">
-        <?= $form->field($model, 'province_code', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Cnarea::getAllByLevel(\common\models\Cnarea::LEVEL_ONE), 'area_code', 'name'), ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'province']); ?>
-        <?= $form->field($model, 'city_code', ['options' => ['class' => 'col-xs-3']])->dropDownList([], ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'city']); ?>
-        <?= $form->field($model, 'district_code', ['options' => ['class' => 'col-xs-3']])->dropDownList([], ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'district']); ?>
+        <?= $form->field($model, 'province_code', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Cnarea::getAllByLevel(\common\models\Cnarea::LEVEL_ONE), 'area_code', 'name'), ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'province','disabled' => 'disabled']); ?>
+        <?= $form->field($model, 'city_code', ['options' => ['class' => 'col-xs-3']])->dropDownList([], ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'city','disabled' => 'disabled']); ?>
+        <?= $form->field($model, 'district_code', ['options' => ['class' => 'col-xs-3']])->dropDownList([], ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'district','disabled' => 'disabled']); ?>
     </div>
-
+    <?php } else {?>
+        <div class="row">
+            <?= $form->field($model, 'province_code', ['options' => ['class' => 'col-xs-3']])->dropDownList(\yii\helpers\ArrayHelper::map(\common\models\Cnarea::getAllByLevel(\common\models\Cnarea::LEVEL_ONE), 'area_code', 'name'), ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'province']); ?>
+            <?= $form->field($model, 'city_code', ['options' => ['class' => 'col-xs-3']])->dropDownList([], ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'city']); ?>
+            <?= $form->field($model, 'district_code', ['options' => ['class' => 'col-xs-3']])->dropDownList([], ['prompt' => '-全部-', 'class' => 'form-control select2', 'id' => 'district']); ?>
+        </div>
+    <?php }?>
 </div>
 <div class="row">
     <?= $form->field($model, 'weight', ['options' => ['class' => 'col-xs-3']])->textInput(['maxlength' => true])->label('首重(公斤)') ?>
@@ -129,7 +151,7 @@ use yii\widgets\ActiveForm;
             type: "get",
             url: "/institution/cnarea/ajax-get-list",
             cache: false,
-            data: {area_code: <?php echo $model->province_code;?>},
+            data: {area_code: <?php echo $model->province_code;?>, select_code: <?php echo $model->city_code;?>},
             dataType: 'json',
             success: function (result) {
                 console.log(result);
@@ -145,19 +167,25 @@ use yii\widgets\ActiveForm;
             }
         });
         <?php  if (!empty($model->city_code)) {?>
+        <?php if (!empty($model->district_code)) {?>
+        const  area_data = {area_code: <?php echo $model->city_code;?>, select_code: <?php echo empty($model->district_code) ? '' : $model->district_code;?>}
+        <?php } else {?>
+        const  area_data = {area_code: <?php echo $model->city_code;?>}
+
+        <?php }?>
+
         $.ajax({
             type: "get",
             url: "/institution/cnarea/ajax-get-list",
             cache: false,
-            data: {area_code: city},
+            data: area_data,
             dataType: 'json',
             success: function (result) {
                 console.log(result);
                 if (result.status == 1) {
                     var html_default = '<option value="">-全部-</option>';
                     var html = html_default + result.data;
-                    $("#city").html(html);
-                    $("#district").html(html_default);
+                    $("#district").html(html);
                     $(".select2").select2({language: 'zh-CN'});
                 } else {
                     alert(result.errorMsg);

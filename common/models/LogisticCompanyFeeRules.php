@@ -9,6 +9,7 @@ use Yii;
  *
  * @property int $id
  * @property int $type 类型 1 快递公司 2 客户仓库
+ * @property int $settlement_dimension 结算维度：1 快递单号 2 订单号
  * @property string $warehouse_code 仓库编码
  * @property int $logistic_id 快递公司 ID
  * @property string $province 省
@@ -59,6 +60,14 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
         self::CONTINUE_COUNT_RULE_MULTIPLY => '相乘',
     ];
 
+    const SETTLEMENT_DIMENSION_LOGISTIC_NO = 1;
+    const SETTLEMENT_DIMENSION_ORDER_NO = 2;
+
+    public static $settlementDimensionList = [
+        self::SETTLEMENT_DIMENSION_LOGISTIC_NO => '快递单号',
+        self::SETTLEMENT_DIMENSION_ORDER_NO => '订单号',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -73,15 +82,14 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['warehouse_code', 'logistic_id', 'province_code', 'weight', 'weight_round_rule', 'price', 'continue_weight_rule', 'type'], 'required'],
+            [['warehouse_code', 'logistic_id', 'province_code', 'weight', 'weight_round_rule', 'price', 'continue_weight_rule', 'type', 'settlement_dimension'], 'required'],
             [['logistic_id', 'weight_round_rule', 'continue_count_rule', 'continue_weight_round_rule', 'type'], 'integer'],
             [['weight', 'price'], 'number'],
             [['continue_weight_rule'], 'string'],
             [['create_time', 'update_time'], 'safe'],
             [['warehouse_code'], 'string', 'max' => 20],
             [['province', 'city', 'district', 'province_code', 'city_code', 'district_code', 'create_username', 'update_username'], 'string', 'max' => 50],
-            [['type', 'warehouse_code', 'logistic_id', 'province', 'city', 'district'], 'unique', 'targetAttribute' => ['type', 'warehouse_code', 'logistic_id', 'province', 'city', 'district']],
-        ];
+            ];
     }
 
     /**
@@ -91,6 +99,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     {
         return [
             'type' => '运费规则类型',
+            'settlement_dimension' => '结算维度',
             'warehouse_code' => '发货仓',
             'logistic_id' => '快递公司',
             'logistic_company_name' => '快递公司',
@@ -152,6 +161,12 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     public static function getContinueCountRule($continueCountRule)
     {
         return isset(self::$continueCountList[$continueCountRule]) ? self::$continueCountList[$continueCountRule] : '无';
+    }
+
+
+    public static function getSettlementDimension($settlementDimension)
+    {
+        return isset(self::$settlementDimensionList[$settlementDimension]) ? self::$settlementDimensionList[$settlementDimension] : '无';
     }
 
 }

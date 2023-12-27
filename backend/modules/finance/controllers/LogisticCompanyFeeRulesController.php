@@ -136,7 +136,6 @@ class LogisticCompanyFeeRulesController extends Controller
 
             if ($this->request->isPost) {
                 $post = $this->request->post();
-                $model->load($post);
                 $continueWeightRule = [];
                 $continueWeightRuleArr = explode("\r\n", $post['LogisticCompanyFeeRules']['continue_weight_rule']);
                 if (empty($continueWeightRuleArr)) {
@@ -147,10 +146,6 @@ class LogisticCompanyFeeRulesController extends Controller
                         $continueWeightRule[$key] = explode(",", $item);
                     }
                 }
-                $model->province = Cnarea::getNameByCode($model->province_code);
-                $model->city = Cnarea::getNameByCode($model->city_code);
-                $model->district = Cnarea::getNameByCode($model->district_code);
-
                 $model->continue_weight_rule = json_encode($continueWeightRule);
                 $model->update_username = \Yii::$app->user->getIdentity()['username'];
                 $model->update_time = date('Y-m-d H:i:s', time());
@@ -167,7 +162,7 @@ class LogisticCompanyFeeRulesController extends Controller
             ]);
         } catch (\Exception $e) {
             \Yii::$app->session->setFlash('error', '修改运费失败，原因：' . $e->getMessage() . '!');
-            return $this->redirect(['update']);
+            return $this->redirect(['index']);
         }
     }
 
