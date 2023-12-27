@@ -153,7 +153,23 @@ class LogisticCompanyCheckBillController extends Controller
     {
         $excelUrl = "/www/wwwroot/jd_cityvan/backend/batch_upload_template/template2.xlsx";
 //        $excelUrl = "/Users/hanxiao/jd_cityvan_git/backend/batch_upload_template/template2.xlsx";
-        $filename = "批量导入快递信息模板.xlsx";
+        $filename = "批量导入对账单信息-快递单号维度模板.xlsx";
+        header("Content-type: application/octet-stream");
+        header("Content-Transfer-Encoding: Binary");
+        header("Content-Length: " . filesize($excelUrl));
+        header("Content-Disposition: attachment; filename=" . $filename);
+        readfile($excelUrl);
+        exit;
+    }
+
+    /**
+     * 批量导入许可证编号模板下载
+     */
+    public function actionDownloadTemplateOrder()
+    {
+        $excelUrl = "/www/wwwroot/jd_cityvan/backend/batch_upload_template/template3.xlsx";
+//        $excelUrl = "/Users/hanxiao/jd_cityvan_git/backend/batch_upload_template/template2.xlsx";
+        $filename = "批量导入对账单信息-订单号维度模板.xlsx";
         header("Content-type: application/octet-stream");
         header("Content-Transfer-Encoding: Binary");
         header("Content-Length: " . filesize($excelUrl));

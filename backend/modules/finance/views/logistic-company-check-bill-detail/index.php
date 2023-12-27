@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'logistic_company_check_bill_no',
                     'warehouse_code',
                     'logistic_id',
+                    'order_no',
                     'logistic_no',
                     'weight',
                     'price',

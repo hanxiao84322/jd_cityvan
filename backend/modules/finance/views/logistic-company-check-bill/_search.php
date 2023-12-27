@@ -69,10 +69,13 @@ Modal::begin([
     ]); ?>
 <div style="width: 50%; height: 100px;">    对账单类型：<?= Html::dropDownList('type', '', [\common\models\LogisticCompanyCheckBill::TYPE_PAY => \common\models\LogisticCompanyCheckBill::$typeList[\common\models\LogisticCompanyCheckBill::TYPE_PAY], \common\models\LogisticCompanyCheckBill::TYPE_REC => \common\models\LogisticCompanyCheckBill::$typeList[\common\models\LogisticCompanyCheckBill::TYPE_REC]],['class' => 'form-control', 'id' => 'order_type']) ?>
 </div>
+<div style="width: 50%; height: 100px;">    结算维度：<?= Html::dropDownList('settlement_dimension', '', [\common\models\LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO => \common\models\LogisticCompanyCheckBill::$settlementDimensionList[\common\models\LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO], \common\models\LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_ORDER_NO => \common\models\LogisticCompanyCheckBill::$settlementDimensionList[\common\models\LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_ORDER_NO]],['class' => 'form-control', 'id' => 'settlement_dimension']) ?>
+</div>
     <?= Html::fileInput('file', '', ['id' => 'file_input']) ?>
     <?php ActiveForm::end(); ?>
 </p>
-<p><?= Html::a('模板下载', ['download-template'], ['class' => 'btn btn-success']) ?>
+<p><?= Html::a('快递单号维度模板下载', ['download-template'], ['class' => 'btn btn-success']) ?>
+<p><?= Html::a('订单号维度模板下载', ['download-template-order'], ['class' => 'btn btn-success']) ?>
 </p>
 <p><?= Html::button('导入（后台执行）', ['class' => 'btn btn-primary', 'id' => 'task-create']) ?>&nbsp;&nbsp;&nbsp;<?= Html::button('关闭', ['class' => 'btn btn-close', 'id' => 'close-btn']) ?></p>
 
@@ -92,10 +95,12 @@ Modal::end();
             const show = $('#message');
             const fileInput = $('#file_input').get(0);
             const orderType = $('#order_type').val();
+            const settlementDimension = $('#settlement_dimension').val();
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
             formData.append('type', <?php echo DeliveryOrderTask::TYPE_CHECK_BILL;?>);
             formData.append('order_type', orderType);
+            formData.append('settlement_dimension', settlementDimension);
             $.ajax({
                 url: '/delivery/delivery-order-task/ajax-create',
                 cache: false,

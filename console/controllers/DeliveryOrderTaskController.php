@@ -40,6 +40,7 @@ class DeliveryOrderTaskController extends Controller
         foreach ($taskList as $task) {
             try {
                 $taskId = $task['id'];
+                $settlementDimension = $task['settlement_dimension'];
                 $taskModel = DeliveryOrderTask::findOne($taskId);
                 $taskModel->status = DeliveryOrderTask::STATUS_UPDATING;
                 $taskModel->start_time = date('Y-m-d H:i:s', time());
@@ -200,7 +201,7 @@ class DeliveryOrderTaskController extends Controller
                                         // 打开临时文件用于写入
                                         $tempHandle = fopen($tempFile, 'w');
                                     // 子进程代码
-                                    $result = $this->processChunk($chunks[$i], $tempOrderNo,$orderType); // 执行任务并将结果存储在对应的索引位置
+                                    $result = $this->processChunk($chunks[$i], $tempOrderNo, $orderType, $settlementDimension); // 执行任务并将结果存储在对应的索引位置
                                     fwrite($tempHandle, json_encode($result) . PHP_EOL);
                                     // 关闭文件句柄并结束子进程
                                     fclose($tempHandle);
@@ -582,8 +583,8 @@ class DeliveryOrderTaskController extends Controller
         ];
 
         $type = 2;
-        $filePath = './22.xlsx';
-
+        $filePath = './4.xlsx';
+        $settlementDimension = LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_ORDER_NO;
         echo "file verify success, begin import\r\n";
         $return = [
             'successCount' => 0,
@@ -730,7 +731,7 @@ class DeliveryOrderTaskController extends Controller
                             // 打开临时文件用于写入
                             $tempHandle = fopen($tempFile, 'w');
                             // 子进程代码
-                            $result = $this->processChunk($chunks[$i], $tempOrderNo,$orderType); // 执行任务并将结果存储在对应的索引位置
+                            $result = $this->processChunk($chunks[$i], $tempOrderNo, $orderType, $settlementDimension); // 执行任务并将结果存储在对应的索引位置
                             fwrite($tempHandle, json_encode($result) . PHP_EOL);
                             // 关闭文件句柄并结束子进程
                             fclose($tempHandle);
@@ -791,7 +792,7 @@ class DeliveryOrderTaskController extends Controller
         echo "finish";
     }
 
-    private function processChunk($chunk, $tempOrderNo,$orderType)
+    private function processChunk($chunk, $tempOrderNo,$orderType, $settlementDimension)
     {
         // 这里是子进程执行的具体任务
         // 可以根据需求使用 Yii2 的组件和工具来处理任务，例如 ActiveRecord、队列组件等
@@ -801,7 +802,7 @@ class DeliveryOrderTaskController extends Controller
             // 执行任务
             foreach ($chunk as $data) {
                 // 处理数据
-                $processedRes = $this->processData($data, $tempOrderNo,$orderType);
+                $processedRes = $this->processData($data, $tempOrderNo,$orderType, $settlementDimension);
                 $result[] = $processedRes;
             }
             return $result;
@@ -812,7 +813,7 @@ class DeliveryOrderTaskController extends Controller
         }
     }
 
-    private function processData($item, $tempOrderNo,$orderType)
+    private function processData($item, $tempOrderNo,$orderType, $settlementDimension)
     {
         $return = [
             'status' => 0,
@@ -839,7 +840,11 @@ class DeliveryOrderTaskController extends Controller
             //                    throw new \Exception('不存在的仓库编码:' . $warehouseCode);
             //                }
             $status = LogisticCompanyCheckBillDetail::STATUS_SAME;
-            $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode, 'logistic_no' => $logisticNo]);
+            if ($settlementDimension == LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO) {
+                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode, 'logistic_no' => $logisticNo]);
+            } else {
+                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode, 'order_no' => $logisticNo]);
+            }
             if (empty($deliveryOrderModel)) {
                 $status = LogisticCompanyCheckBillDetail::STATUS_NOT_FOUND;
             } else {
@@ -850,7 +855,11 @@ class DeliveryOrderTaskController extends Controller
 
             $systemWeight = '';
             $systemPrice = '';
-            $logisticCompanySettlementOrderDetailModel = LogisticCompanySettlementOrderDetail::findOne(['logistic_no' => $logisticNo]);
+            if ($settlementDimension == LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO) {
+                $logisticCompanySettlementOrderDetailModel = LogisticCompanySettlementOrderDetail::findOne(['logistic_no' => $logisticNo]);
+            } else {
+                $logisticCompanySettlementOrderDetailModel = LogisticCompanySettlementOrderDetail::findOne(['order_no' => $logisticNo]);
+            }
             if (empty($logisticCompanySettlementOrderDetailModel)) {
                 $status = LogisticCompanyCheckBillDetail::STATUS_SYSTEM_NOT_SETTLEMENT;
             } else {
@@ -858,8 +867,13 @@ class DeliveryOrderTaskController extends Controller
                     $systemWeight = $logisticCompanySettlementOrderDetailModel->weight;
                     $systemPrice = $logisticCompanySettlementOrderDetailModel->need_pay_amount;
                 } else {
-                    $systemWeight = $logisticCompanySettlementOrderDetailModel->jd_weight;
-                    $systemPrice = $logisticCompanySettlementOrderDetailModel->need_receipt_amount;
+                    if ($settlementDimension == LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO) {
+                        $systemWeight = $logisticCompanySettlementOrderDetailModel->jd_weight;
+                        $systemPrice = $logisticCompanySettlementOrderDetailModel->need_receipt_amount;
+                } else {
+                        $systemWeight = $logisticCompanySettlementOrderDetailModel->jd_order_weight;
+                        $systemPrice = $logisticCompanySettlementOrderDetailModel->order_need_receipt_amount;
+                    }
                 }
 
                 if ($systemWeight != $orderWeight) {
@@ -872,8 +886,11 @@ class DeliveryOrderTaskController extends Controller
                     $status = LogisticCompanyCheckBillDetail::STATUS_WEIGHT_DIFF;
                 }
             }
-
-            $logisticCompanyCheckBillDetailExists = LogisticCompanyCheckBillDetail::findOne(['logistic_no' => $logisticNo, 'order_type' => $orderType]);
+            if ($settlementDimension == LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO) {
+                $logisticCompanyCheckBillDetailExists = LogisticCompanyCheckBillDetail::findOne(['logistic_no' => $logisticNo, 'order_type' => $orderType]);
+            } else {
+                $logisticCompanyCheckBillDetailExists = LogisticCompanyCheckBillDetail::findOne(['order_no' => $logisticNo, 'order_type' => $orderType]);
+            }
             if (!empty($logisticCompanyCheckBillDetailExists)) {
                 $status = LogisticCompanyCheckBillDetail::STATUS_EXISTS;
                 $note = '对账单号：' . $logisticCompanyCheckBillDetailExists->logistic_company_check_bill_no;
@@ -882,7 +899,11 @@ class DeliveryOrderTaskController extends Controller
             $logisticCompanyCheckBillDetailModel->logistic_company_check_bill_no = $tempOrderNo;
             $logisticCompanyCheckBillDetailModel->warehouse_code = $warehouseCode;
             $logisticCompanyCheckBillDetailModel->logistic_id = $logisticId;
-            $logisticCompanyCheckBillDetailModel->logistic_no = $logisticNo;
+            if ($settlementDimension == LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO) {
+                $logisticCompanyCheckBillDetailModel->logistic_no = $logisticNo;
+            } else {
+                $logisticCompanyCheckBillDetailModel->order_no = $logisticNo;
+            }
             $logisticCompanyCheckBillDetailModel->order_type = $orderType;
             $logisticCompanyCheckBillDetailModel->weight = $orderWeight;
             $logisticCompanyCheckBillDetailModel->price = $orderPrice;

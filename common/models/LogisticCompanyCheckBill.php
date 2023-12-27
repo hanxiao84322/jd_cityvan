@@ -12,6 +12,7 @@ use Yii;
  * @property int $logistic_id 快递公司ID
  * @property string $warehouse_code 仓库编码
  * @property int $type 1 付费 2 收费
+ * @property int $settlement_dimension 结算维度：1 快递单号 2 订单号
  * @property string $date 生成日期
  * @property int $logistic_company_order_num 快递公司导入订单数量
  * @property int $system_order_num 系统存在订单数量
@@ -42,6 +43,15 @@ class LogisticCompanyCheckBill extends \yii\db\ActiveRecord
     public static  $typeList = [
         self::TYPE_PAY => '付费',
         self::TYPE_REC => '收费',
+    ];
+
+
+    const SETTLEMENT_DIMENSION_LOGISTIC_NO = 1;
+    const SETTLEMENT_DIMENSION_ORDER_NO = 2;
+
+    public static $settlementDimensionList = [
+        self::SETTLEMENT_DIMENSION_LOGISTIC_NO => '快递单号',
+        self::SETTLEMENT_DIMENSION_ORDER_NO => '订单号',
     ];
 
     /**
@@ -121,5 +131,10 @@ class LogisticCompanyCheckBill extends \yii\db\ActiveRecord
     public static function getTypeName($type)
     {
         return isset(self::$typeList[$type]) ? self::$typeList[$type] : '无';
+    }
+
+    public static function getSettlementDimension($settlementDimension)
+    {
+        return isset(self::$settlementDimensionList[$settlementDimension]) ? self::$settlementDimensionList[$settlementDimension] : '无';
     }
 }

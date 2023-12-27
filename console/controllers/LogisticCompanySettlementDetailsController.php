@@ -307,7 +307,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                             }
                             $continueWeightRule = json_decode($logisticCompanyFeeRulesResult['continue_weight_rule'], true);
                             if (empty($continueWeightRule)) {
-                                throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . ",快递单号：" . $itemLogisticNo . "，重量：" . $jdWeight . ",首重：" . $logisticCompanyFeeRulesResult['weight'] . ",续重：" . $continueOrderWeight . ",没有对应的续重规则");
+                                throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . ",订单号：" . $itemOrderNo . "，重量：" . $jdWeight . ",首重：" . $logisticCompanyFeeRulesResult['weight'] . ",续重：" . $continueOrderWeight . ",没有对应的续重规则");
                             }
                             $hasContinueWeightRule = false;
                             foreach ($continueWeightRule as $value) {
@@ -321,7 +321,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                                 }
                             }
                             if (!$hasContinueWeightRule) {
-                                throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . ",快递单号：" . $itemLogisticNo . "，重量：" . $jdWeight . ",首重：" . $logisticCompanyFeeRulesResult['weight'] . ",续重：" . $continueOrderWeight . ",没有对应的续重规则");
+                                throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district .  ",订单号：" . $itemOrderNo . "，重量：" . $jdWeight . ",首重：" . $logisticCompanyFeeRulesResult['weight'] . ",续重：" . $continueOrderWeight . ",没有对应的续重规则");
                             }
                         }
 

@@ -14,6 +14,7 @@ use Yii;
  * @property string $warehouse_code 仓库编码
  * @property int $logistic_id 快递公司ID
  * @property string $logistic_no 快递单号
+ * @property string $order_no 订单号
  * @property float $weight 重量
  * @property float $price 应付金额
  * @property float $system_weight 系统重量
@@ -59,12 +60,12 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['warehouse_code', 'logistic_id', 'logistic_no', 'weight', 'price', 'status', 'create_username', 'create_time'], 'required'],
+            [['warehouse_code', 'logistic_id',  'weight', 'price', 'status', 'create_username', 'create_time'], 'required'],
             [['logistic_id', 'status', 'order_type'], 'integer'],
             [['weight', 'price', 'system_weight', 'system_price'], 'number'],
             [['note'], 'string'],
             [['create_time'], 'safe'],
-            [['logistic_company_check_bill_no', 'logistic_no', 'create_username'], 'string', 'max' => 50],
+            [['logistic_company_check_bill_no', 'logistic_no', 'create_username', 'order_no'], 'string', 'max' => 50],
             [['warehouse_code'], 'string', 'max' => 20],
         ];
     }
@@ -81,6 +82,7 @@ class LogisticCompanyCheckBillDetail extends \yii\db\ActiveRecord
             'warehouse_code' => '仓库编码',
             'logistic_id' => '快递公司',
             'logistic_company_name' => '快递公司',
+            'order_no' => '订单号',
             'logistic_no' => '快递单号',
             'weight' => '导入重量',
             'price' => '导入金额',
