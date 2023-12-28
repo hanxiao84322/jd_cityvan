@@ -77,6 +77,7 @@ class LogisticCompanyCheckBillSearch extends LogisticCompanyCheckBill
         }
         $query->andWhere(['>=', 'lccb.create_time', $this->create_time_start]);
         $query->andWhere(['<=', 'lccb.create_time', $this->create_time_end]);
+
         $query->orderBy('lccb.create_time DESC');
 
 //                echo $query->createCommand()->getRawSql();exit;

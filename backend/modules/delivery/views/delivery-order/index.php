@@ -113,7 +113,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) ? 1 : 0,
                         'format' => 'raw',
                         'value' => function ($model) {
-                            return $model->total_price;
+                            return DeliveryOrder::getJdTotalPrice($model->warehouse_code, $model->total_price, $model->split_total_price);
                         }
                     ],
                     'update_name',

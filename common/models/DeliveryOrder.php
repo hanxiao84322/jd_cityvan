@@ -62,6 +62,7 @@ use common\components\Utility;
  * @property string|null $truck_classes_no 卡车班次
  * @property float|null $order_total_price 支付快递公司金额
  * @property float|null $total_price 收取京东金额
+ * @property float|null $split_total_price 收取京东金额
  * @property string|null $create_name 创建人用户名
  * @property string|null $create_time 创建时间
  * @property string|null $update_name 更新人用户名
@@ -497,6 +498,15 @@ class DeliveryOrder extends \yii\db\ActiveRecord
     {
         return self::find()->select('count(*) as shipping_num, sum(shipping_weight_rep) as total_jd_weight')->where(['order_no' => $orderNo])->column();
 
+    }
+
+    public static function getJdTotalPrice($warehouseCode, $totalPrice, $splitTotalPrice)
+    {
+        if ($warehouseCode == 'cd') {
+            return $splitTotalPrice;
+        } else {
+            return $totalPrice;
+        }
     }
 
 }

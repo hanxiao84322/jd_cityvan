@@ -106,7 +106,6 @@ class LogisticCompanySettlementDetailsController extends Controller
                         }
 
                         $fee = $logisticCompanyFeeRulesResult['price'];
-
                         if ($weight > $logisticCompanyFeeRulesResult['weight']) {
                             $continueWeight = $weight - $logisticCompanyFeeRulesResult['weight'];
                             $continueWeightRule = json_decode($logisticCompanyFeeRulesResult['continue_weight_rule'], true);
