@@ -146,6 +146,10 @@ class LogisticCompanyFeeRulesController extends Controller
                         $continueWeightRule[$key] = explode(",", $item);
                     }
                 }
+                $model->weight = $post['LogisticCompanyFeeRules']['weight'];
+                $model->weight_round_rule = $post['LogisticCompanyFeeRules']['weight_round_rule'];
+                $model->continue_count_rule = $post['LogisticCompanyFeeRules']['continue_count_rule'];
+                $model->price = $post['LogisticCompanyFeeRules']['price'];
                 $model->continue_weight_rule = json_encode($continueWeightRule);
                 $model->update_username = \Yii::$app->user->getIdentity()['username'];
                 $model->update_time = date('Y-m-d H:i:s', time());

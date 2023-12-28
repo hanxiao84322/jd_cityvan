@@ -130,7 +130,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
                 $continueWeightRoundRuleText .= implode(',', $item) . "\r\n";
             }
         }
-            
+
         return $continueWeightRoundRuleText;
     }
 
