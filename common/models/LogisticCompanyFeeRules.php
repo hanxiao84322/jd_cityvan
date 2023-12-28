@@ -47,7 +47,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
 
     const TYPE_LOGISTIC = 1;
     const TYPE_WAREHOUSE = 2;
-    public static  $typeList = [
+    public static $typeList = [
         self::TYPE_LOGISTIC => '快递公司',
         self::TYPE_WAREHOUSE => '客户仓库',
     ];
@@ -89,7 +89,7 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
             [['create_time', 'update_time'], 'safe'],
             [['warehouse_code'], 'string', 'max' => 20],
             [['province', 'city', 'district', 'province_code', 'city_code', 'district_code', 'create_username', 'update_username'], 'string', 'max' => 50],
-            ];
+        ];
     }
 
     /**
@@ -125,23 +125,28 @@ class LogisticCompanyFeeRules extends \yii\db\ActiveRecord
     {
         $continueWeightRoundRuleText = '';
         $continueWeightRoundRuleArr = json_decode($continueWeightRoundRule, true);
-        foreach ($continueWeightRoundRuleArr as $item) {
-            $continueWeightRoundRuleText .= implode(',', $item) . "\r\n";
+        if (!empty($continueWeightRoundRuleArr)) {
+            foreach ($continueWeightRoundRuleArr as $item) {
+                $continueWeightRoundRuleText .= implode(',', $item) . "\r\n";
+            }
         }
-
+            
         return $continueWeightRoundRuleText;
     }
 
-    public static function getContinueWeightRoundRuleView($continueWeightRoundRule) {
+    public static function getContinueWeightRoundRuleView($continueWeightRoundRule)
+    {
         $continueWeightRoundRuleText = '';
         $continueWeightRoundRuleArr = json_decode($continueWeightRoundRule, true);
+        if (!empty($continueWeightRoundRuleArr)) {
             foreach ($continueWeightRoundRuleArr as $key => $item) {
                 if (empty($item[1])) {
-                    $continueWeightRoundRuleText .= "第" . $key + 1 . "阶-大于:" . $item[0] .",价格(元):" . $item['2'] . "<br>";
+                    $continueWeightRoundRuleText .= "第" . $key + 1 . "阶-大于:" . $item[0] . ",价格(元):" . $item['2'] . "<br>";
                 } else {
                     $continueWeightRoundRuleText .= "第" . $key + 1 . "阶-起始重量:" . $item[0] . ",结束重量:" . $item['1'] . ",价格(元):" . $item['2'] . "<br>";
 
                 }
+            }
 
         }
 
