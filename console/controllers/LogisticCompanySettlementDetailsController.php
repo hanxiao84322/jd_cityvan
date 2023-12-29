@@ -272,7 +272,9 @@ class LogisticCompanySettlementDetailsController extends Controller
             } catch (\Exception $e) {
                 echo $e->getMessage() . "\r\n";
             }
+            \Yii::$app->db->close(); // Close the connection if opened
             print_r($return);
+            echo "finish";
         }
     }
 
