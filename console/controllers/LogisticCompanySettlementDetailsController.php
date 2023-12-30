@@ -141,16 +141,17 @@ class LogisticCompanySettlementDetailsController extends Controller
     }
 
     /**
-     * ./yii logistic-company-settlement-details/jd-run '' '' '' '' ''
+     * ./yii logistic-company-settlement-details/jd-run '' '' '' '' '' ''
      *
      * @param $logisticNo
      * @param $orderNo
      * @param $warehouseCode
      * @param $province
      * @param $startTime
+     * @param $processes
      * @param $endTime
      */
-    public function actionJdRun($startTime = '', $endTime = '', $warehouseCode = '', $province = '', $logisticNo = '', $orderNo = '')
+    public function actionJdRun($processes = 2, $startTime = '', $endTime = '', $warehouseCode = '', $province = '', $logisticNo = '', $orderNo = '')
     {
         $sql = "SELECT warehouse_code, province FROM " . LogisticCompanyFeeRules::tableName() . " WHERE  type = " . LogisticCompanyFeeRules::TYPE_WAREHOUSE . "  ";
         if (!empty($warehouseCode)) {
@@ -198,7 +199,6 @@ class LogisticCompanySettlementDetailsController extends Controller
                 }
                 echo "仓库编码：" . $item['warehouse_code'] . "，省：" . $item['province'] .  "有:" . count($deliveryOrderResult) . "条运单需要处理\r\n";
 
-                $processes = count($deliveryOrderResult)/20000; // 每个子进程跑 20000 条数据，需要创建的子进程数量
                 if ($processes < 1) {
                     $processes = 2;
                 }
