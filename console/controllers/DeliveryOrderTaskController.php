@@ -21,8 +21,11 @@ class DeliveryOrderTaskController extends Controller
 
     /**
      * ./yii delivery-order-task/run
+     *
+     * @param $processes
+     *
      */
-    public function actionRun()
+    public function actionRun($processes = 5)
     {
         ini_set('memory_limit', '2048M');
         set_time_limit(0);
@@ -180,7 +183,6 @@ class DeliveryOrderTaskController extends Controller
                         echo "data count:" . count($excelData) . "\r\n";
                         $tempOrderNo = 'TZF' . (string)time();
                         $orderType = $task['order_type'];
-                        $processes = count($excelData)/20000; // 每个子进程跑 20000 条数据，需要创建的子进程数量
                         if ($processes < 1) {
                             $processes = 2;
                         }

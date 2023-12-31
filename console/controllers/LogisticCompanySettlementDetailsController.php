@@ -151,7 +151,7 @@ class LogisticCompanySettlementDetailsController extends Controller
      * @param $processes
      * @param $endTime
      */
-    public function actionJdRun($processes = 2, $startTime = '', $endTime = '', $warehouseCode = '', $province = '', $logisticNo = '', $orderNo = '')
+    public function actionJdRun($processes = 5, $startTime = '', $endTime = '', $warehouseCode = '', $province = '', $logisticNo = '', $orderNo = '')
     {
         $sql = "SELECT warehouse_code, province FROM " . LogisticCompanyFeeRules::tableName() . " WHERE  type = " . LogisticCompanyFeeRules::TYPE_WAREHOUSE . "  ";
         if (!empty($warehouseCode)) {
@@ -183,7 +183,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                 if (empty($endTime)) {
                     $endTime = date('Y-m-d 23:59:59', strtotime('-1 day'));
                 }
-                $deliveryOrderSql = "SELECT shipping_weight_rep, shipping_weight, order_weight, order_weight_rep, logistic_no, order_no, warehouse_code, logistic_id,finish_time, province, city, district FROM delivery_order where create_time > '2023-10-01' AND create_time >= '" . $startTime . "' AND create_time <= '" . $endTime . "' and warehouse_code = '" . $item['warehouse_code'] . "' AND province ='" . $item['province'] . "' AND  is_logistic_company_settle = 0 ";
+                $deliveryOrderSql = "SELECT shipping_weight_rep, shipping_weight, order_weight, order_weight_rep, logistic_no, order_no, warehouse_code, logistic_id,finish_time, province, city, district FROM delivery_order where create_time >= '" . $startTime . "' AND create_time <= '" . $endTime . "' and warehouse_code = '" . $item['warehouse_code'] . "' AND province ='" . $item['province'] . "' AND  is_logistic_company_settle = 0 ";
                 if (!empty($logisticNo)) {
                     $deliveryOrderSql .= " AND logistic_no = '" . $logisticNo . "' ";
                 } else {
@@ -287,12 +287,15 @@ class LogisticCompanySettlementDetailsController extends Controller
         try {
             // 执行任务
             foreach ($chunk as $data) {
+                $startTime = time();
                 // 处理数据
                 if ($type == 'jd') {
                     $processedRes = $this->jdProcessData($data);
                 } else {
                     $processedRes = $this->processData($data);
                 }
+                $endTime = time();
+                echo "time ::" . ($endTime - $startTime) . "\r\n";
                 $result[] = $processedRes;
             }
             return $result;
