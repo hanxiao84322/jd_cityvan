@@ -31,11 +31,13 @@ class UserBackend extends \yii\db\ActiveRecord implements IdentityInterface
     const TYPE_SYSTEM = 1;
     const TYPE_CUSTOMER_SERVICE = 2;
     const TYPE_LOGISTIC_CUSTOMER_SERVICE = 3;
+    const TYPE_FINANCE = 4;
 
     public static  $typeList = [
         self::TYPE_SYSTEM => '系统管理人员',
         self::TYPE_CUSTOMER_SERVICE => '系统客服',
         self::TYPE_LOGISTIC_CUSTOMER_SERVICE => '快递公司客服',
+        self::TYPE_FINANCE => '财务人员',
     ];
     public static  $staffTypeList = [
         self::TYPE_CUSTOMER_SERVICE => '系统客服',
