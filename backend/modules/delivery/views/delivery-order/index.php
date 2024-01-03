@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'reject_in_warehouse_time',
                     [
                         'header' => '是否与快递公司结算',
-                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) ? 1 : 0,
+                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM || \Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_FINANCE) ? 1 : 0,
                         'format' => 'raw',
                         'value' => function ($model) {
                             return DeliveryOrder::getYesOrNotName($model->is_logistic_company_settle);
@@ -102,7 +102,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'header' => '支付快递公司金额',
-                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) ? 1 : 0,
+                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM || \Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_FINANCE) ? 1 : 0,
                         'format' => 'raw',
                         'value' => function ($model) {
                             return $model->order_total_price;
@@ -110,7 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'header' => '收取京东金额',
-                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM) ? 1 : 0,
+                        'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM || \Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_FINANCE) ? 1 : 0,
                         'format' => 'raw',
                         'value' => function ($model) {
                             return DeliveryOrder::getJdTotalPrice($model->warehouse_code, $model->total_price, $model->split_total_price);
