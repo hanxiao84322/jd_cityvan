@@ -173,6 +173,33 @@ class WorkOrderController extends Controller
     public function actionTest()
     {
         echo WorkOrder::generateId();
-
     }
+
+    /**
+     * ./yii work-order/fix-work-order-no
+     */
+    public function actionFixWorkOrderNo()
+    {
+        $sql = "SELECT COUNT(*) as total, work_order_no FROM `work_order` where work_order_no = 'WO2310110001111' group by work_order_no HAVING count(*) > 2 order by COUNT(*) desc;  ";
+        echo "sql:" . $sql . "\r\n";
+
+        $result = \Yii::$app->db->createCommand($sql)->queryAll();
+        if (empty($result)) {
+            echo "没有要执行的数据";
+            exit;
+        }
+        foreach ($result as $item) {
+            try {
+                $total = $item['total'];
+                for ($i = 1; $i < $total; $i++) {
+                    $workOrderNo = $item['work_order_no'] . $i;
+                    echo $workOrderNo . "\r\n";
+                    WorkOrder::updateAll(['work_order_no' => $workOrderNo], ['work_order_no' => $item['work_order_no']]);
+                }
+            } catch (\Exception $e) {
+                echo $e->getMessage() . "\r\n";
+            }
+        }
+    }
+
 }

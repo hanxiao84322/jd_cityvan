@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'header' => '收取京东金额',
                         'visible' => (\Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_SYSTEM || \Yii::$app->user->getIdentity()['type'] == \backend\models\UserBackend::TYPE_FINANCE) ? 1 : 0,
-                        'format' => 'raw',
+                            'format' => 'raw',
                         'value' => function ($model) {
                             return DeliveryOrder::getJdTotalPrice($model->warehouse_code, $model->total_price, $model->split_total_price);
                         }

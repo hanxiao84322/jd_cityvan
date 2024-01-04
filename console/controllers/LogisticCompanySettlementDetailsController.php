@@ -183,7 +183,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                 if (empty($endTime)) {
                     $endTime = date('Y-m-d 23:59:59', strtotime('-1 day'));
                 }
-                $deliveryOrderSql = "SELECT shipping_weight_rep, shipping_weight, order_weight, order_weight_rep, logistic_no, order_no, warehouse_code, logistic_id,finish_time, province, city, district FROM delivery_order where create_time >= '" . $startTime . "' AND create_time <= '" . $endTime . "' and warehouse_code = '" . $item['warehouse_code'] . "' AND province ='" . $item['province'] . "' AND  is_logistic_company_settle = 0 ";
+                $deliveryOrderSql = "SELECT shipping_weight_rep, shipping_weight, order_weight, order_weight_rep, logistic_no, order_no, warehouse_code, logistic_id,finish_time, province, city, district,create_time FROM delivery_order where create_time >= '" . $startTime . "' AND create_time <= '" . $endTime . "' and warehouse_code = '" . $item['warehouse_code'] . "' AND province ='" . $item['province'] . "' AND  is_logistic_company_settle = 0 ";
                 if (!empty($logisticNo)) {
                     $deliveryOrderSql .= " AND logistic_no = '" . $logisticNo . "' ";
                 } else {
@@ -335,6 +335,7 @@ class LogisticCompanySettlementDetailsController extends Controller
             $province = $deliveryOrder['province'];
             $city = $deliveryOrder['city'];
             $district = $deliveryOrder['district'];
+            $orderCreateTime = $deliveryOrder['create_time'];
 
             $logisticCompanyFeeRulesSql = "SELECT * FROM " . LogisticCompanyFeeRules::tableName() . " where type = " . LogisticCompanyFeeRules::TYPE_WAREHOUSE . " AND warehouse_code = '" . $itemWarehouseCode . "' AND province = '" . $province . "' AND city = '" . $city . "' AND district = '" . $district . "'";
 //                        echo "logisticCompanyFeeRulesSql:" . $logisticCompanyFeeRulesSql . "\r\n";
@@ -448,6 +449,8 @@ class LogisticCompanySettlementDetailsController extends Controller
             $logisticCompanySettlementOrderDetailModel->jd_order_weight = $jdOrderWeight;
             $logisticCompanySettlementOrderDetailModel->order_need_receipt_amount = $orderFee;
             $logisticCompanySettlementOrderDetailModel->order_split_shipping_need_receipt_amount = $splitAmount;
+            $logisticCompanySettlementOrderDetailModel->order_create_time = $orderCreateTime;
+            $logisticCompanySettlementOrderDetailModel->update_time = date('Y-m-d H:i:s', time());
             if (!$logisticCompanySettlementOrderDetailModel->save()) {
                 throw new \Exception("仓库编码：" . $itemWarehouseCode . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . ",快递单号：" . $itemLogisticNo . "更新快递公司结算单明细失败，原因:" . Utility::arrayToString($logisticCompanySettlementOrderDetailModel->getErrors()));
             } else {
@@ -476,6 +479,7 @@ class LogisticCompanySettlementDetailsController extends Controller
             $province = $deliveryOrder['province'];
             $city = $deliveryOrder['city'];
             $district = $deliveryOrder['district'];
+            $orderCreateTime = $deliveryOrder['create_time'];
 
             //快递公司计算运费开始
             $logisticCompanyFeeRulesSql = "SELECT * FROM " . LogisticCompanyFeeRules::tableName() . " where type = " . LogisticCompanyFeeRules::TYPE_LOGISTIC . " AND logistic_id = '" . $itemLogisticId . "' AND province = '" . $province . "' AND city = '" . $city . "' AND district = '" . $district . "'";
@@ -548,6 +552,9 @@ class LogisticCompanySettlementDetailsController extends Controller
             }
             $logisticCompanySettlementOrderDetailModel->weight = $weight;
             $logisticCompanySettlementOrderDetailModel->need_pay_amount = $fee;
+
+            $logisticCompanySettlementOrderDetailModel->order_create_time = $orderCreateTime;
+            $logisticCompanySettlementOrderDetailModel->update_time = date('Y-m-d H:i:s', time());
             if (!$logisticCompanySettlementOrderDetailModel->save()) {
                 throw new \Exception("快递公司ID：" . $itemLogisticId . ",省：" . $province . ",市：" . $city . ",区/县：" . $district . "快递单号：" . $itemLogisticNo . "更新快递公司结算单明细失败，原因:" . Utility::arrayToString($logisticCompanySettlementOrderDetailModel->getErrors()));
             } else {

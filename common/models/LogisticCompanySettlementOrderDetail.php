@@ -27,6 +27,8 @@ use Yii;
  * @property float|null $order_split_shipping_need_receipt_amount 京东结算订单维度均分后快递应收金额元
  * @property string $finish_time 到达最终状态时间 妥投时间 拒收时间 丢失时间
  * @property string|null $create_time 创建时间
+ * @property string|null $order_create_time 订单创建时间
+ * @property string|null $update_time 更新时间
  */
 class LogisticCompanySettlementOrderDetail extends \yii\db\ActiveRecord
 {
