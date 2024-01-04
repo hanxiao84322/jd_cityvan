@@ -177,18 +177,22 @@ class LogisticCompanySettlementDetailsController extends Controller
                     'errorCount' => 0,
                     'errorList' => [],
                 ];
-                if (empty($startTime)) {
-                    $startTime = date('Y-m-d 00:00:00', strtotime('-1 day'));
-                }
-                if (empty($endTime)) {
-                    $endTime = date('Y-m-d 23:59:59', strtotime('-1 day'));
-                }
-                $deliveryOrderSql = "SELECT shipping_weight_rep, shipping_weight, order_weight, order_weight_rep, logistic_no, order_no, warehouse_code, logistic_id,finish_time, province, city, district,create_time FROM delivery_order where create_time >= '" . $startTime . "' AND create_time <= '" . $endTime . "' and warehouse_code = '" . $item['warehouse_code'] . "' AND province ='" . $item['province'] . "' AND  is_logistic_company_settle = 0 ";
+
+                $deliveryOrderSql = "SELECT shipping_weight_rep, shipping_weight, order_weight, order_weight_rep, logistic_no, order_no, warehouse_code, logistic_id,finish_time, province, city, district,create_time FROM delivery_order where warehouse_code = '" . $item['warehouse_code'] . "' AND province ='" . $item['province'] . "' AND  is_logistic_company_settle = 0 ";
                 if (!empty($logisticNo)) {
                     $deliveryOrderSql .= " AND logistic_no = '" . $logisticNo . "' ";
                 } else {
                     if (!empty($orderNo)) {
                         $deliveryOrderSql .= " AND order_no = '" . $orderNo . "' ";
+                    } else {
+                        if (empty($startTime)) {
+                            $startTime = date('Y-m-d 00:00:00', strtotime('-1 day'));
+                        }
+                        $deliveryOrderSql .= " AND create_time >= '" . $startTime . "' ";
+                        if (empty($endTime)) {
+                            $endTime = date('Y-m-d 23:59:59', strtotime('-1 day'));
+                        }
+                        $deliveryOrderSql .= " AND create_time <= '" . $endTime . "' ";
                     }
                 }
 
@@ -314,19 +318,10 @@ class LogisticCompanySettlementDetailsController extends Controller
         ];
 
         try {
-            if (empty($deliveryOrder['shipping_weight_rep'])) {
-                $jdWeight = $deliveryOrder['shipping_weight']; //京东结算取包裹重量
-            } else {
-                $jdWeight = $deliveryOrder['shipping_weight_rep']; //京东结算取包裹重量
-            }
-            if (empty($deliveryOrder['order_weight_rep'])) {
-                $jdOrderWeight = $deliveryOrder['order_weight']; //京东结算取包裹重量
-            } else {
-                $jdOrderWeight = $deliveryOrder['order_weight_rep']; //京东结算取包裹重量
-            }
 
             $itemOrderNo = $deliveryOrder['order_no'];
-
+            $jdOrderWeight = DeliveryOrder::getJdOrderWeightByOrderNo($itemOrderNo);
+            $jdWeight = DeliveryOrder::getJdWeightByOrderNo($itemOrderNo);
             $itemLogisticNo = $deliveryOrder['logistic_no'];
             $itemLogisticId = $deliveryOrder['logistic_id'];
             $itemWarehouseCode = $deliveryOrder['warehouse_code'];

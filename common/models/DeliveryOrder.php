@@ -500,6 +500,17 @@ class DeliveryOrder extends \yii\db\ActiveRecord
 
     }
 
+    public static function getJdOrderWeightByOrderNo($orderNo)
+    {
+        return self::find()->select('GREATEST(MAX(order_weight), MAX(order_weight_rep)) AS max_value')->where(['order_no' => $orderNo])->scalar();
+
+    }
+
+    public static function getJdWeightByOrderNo($orderNo)
+    {
+        return self::find()->select('GREATEST(MAX(shipping_weight), MAX(shipping_weight_rep)) AS max_value')->where(['order_no' => $orderNo])->scalar();
+    }
+
     public static function getJdTotalPrice($warehouseCode, $totalPrice, $splitTotalPrice)
     {
         if ($warehouseCode == 'cd') {
