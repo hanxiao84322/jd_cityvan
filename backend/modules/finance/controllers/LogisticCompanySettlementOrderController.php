@@ -137,6 +137,7 @@ class LogisticCompanySettlementOrderController extends Controller
                 } else {
                     $needAmount = $noPreferentialAmount;
                 }
+                $needAmount = LogisticCompanySettlementOrder::getFixedDiscount($model->warehouse_code, $needAmount, $model->order_num);
                 $model->preferential_amount = $noPreferentialAmount - $needAmount;
 
                 $model->adjust_amount = $totalAdjustAmount;
