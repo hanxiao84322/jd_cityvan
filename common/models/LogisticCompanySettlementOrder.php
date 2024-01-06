@@ -184,4 +184,34 @@ class LogisticCompanySettlementOrder extends \yii\db\ActiveRecord
         }
         return $adjustTermHtml;
     }
+
+    public static function getFixedDiscount($warehouseCode, $needAmount, $settlementOrderNum)
+    {
+        $specifiedDate = date('Y-m-d H:i:s', time()); // 指定时间
+// 获取指定时间的上一个月
+        $lastMonth = strtotime('-1 month', strtotime($specifiedDate));
+
+// 获取上一个月的第一天
+        $firstDay = date('Y-m-01 00:00:00', $lastMonth);
+
+// 获取上一个月的最后一天
+        $lastDay = date('Y-m-t 23:59:59', $lastMonth);
+
+        $orderNum = DeliveryOrder::find()->where("warehouse_code = '" . $warehouseCode . "' AND  (delivered_time >= '" . $firstDay . "' and delivered_time < '" . $lastDay . "') OR (replace_delivered_time >= '" . $firstDay . "' and replace_delivered_time < '" . $lastDay . "')")->count();
+
+        switch ($orderNum) {
+            case $orderNum >= 0 && $orderNum < 20000:
+                $needAmount = $needAmount;
+                break;
+            case $orderNum >= 20000 && $orderNum < 30000:
+                $needAmount = $needAmount - $settlementOrderNum*0.5;
+                break;
+            case $orderNum >= 30000:
+                $needAmount = $needAmount - $settlementOrderNum*1;
+                break;
+            default:
+                $needAmount = $needAmount;
+        }
+        return $needAmount;
+    }
 }

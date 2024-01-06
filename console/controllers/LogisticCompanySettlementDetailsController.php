@@ -203,7 +203,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                 }
                 echo "仓库编码：" . $item['warehouse_code'] . "，省：" . $item['province'] .  "有:" . count($deliveryOrderResult) . "条运单需要处理\r\n";
 
-                if ($processes < 1) {
+                if ($processes < 1 || count($deliveryOrderResult) < $processes) {
                     $processes = 2;
                 }
                 $chunks = array_chunk($deliveryOrderResult, ceil(count($deliveryOrderResult) / $processes)); // 将大数组拆分成多个小数组
@@ -211,27 +211,29 @@ class LogisticCompanySettlementDetailsController extends Controller
                 // 创建指定数量的子进程
                 for ($i = 0; $i < $processes; $i++) {
                     try {
-                        $pid = pcntl_fork();
-                        if ($pid == -1) {
-                            throw new \Exception('can not create sub processes');
-                        } elseif ($pid) {
-                            $tempFiles[$pid] = "temp_file_$pid.txt";
-                        } else {
-                            \Yii::$app->db->close(); // Close the connection if opened
-                            \Yii::$app->db->open();  // Reopen the connection
-                            $tempFile = "temp_file_" . getmypid() . ".txt";
-                            // 打开临时文件用于写入
-                            $tempHandle = fopen($tempFile, 'w');
-                            // 子进程代码
-                            echo "sub process data count:" . count($chunks[$i]) . "\r\n";
-                            $result = $this->processChunk($chunks[$i], 'jd'); // 执行任务并将结果存储在对应的索引位置
-                            fwrite($tempHandle, json_encode($result) . PHP_EOL);
-                            // 关闭文件句柄并结束子进程
-                            fclose($tempHandle);
-                            \Yii::$app->db->close();
-                            sleep(2);
-                            exit(); // 子进程执行完任务后退出
+                        if (!empty($chunks[$i])) {
+                            $pid = pcntl_fork();
+                            if ($pid == -1) {
+                                throw new \Exception('can not create sub processes');
+                            } elseif ($pid) {
+                                $tempFiles[$pid] = "temp_file_$pid.txt";
+                            } else {
+                                \Yii::$app->db->close(); // Close the connection if opened
+                                \Yii::$app->db->open();  // Reopen the connection
+                                $tempFile = "temp_file_" . getmypid() . ".txt";
+                                // 打开临时文件用于写入
+                                $tempHandle = fopen($tempFile, 'w');
+                                // 子进程代码
+                                echo "sub process data count:" . count($chunks[$i]) . "\r\n";
+                                $result = $this->   processChunk($chunks[$i], 'jd'); // 执行任务并将结果存储在对应的索引位置
+                                fwrite($tempHandle, json_encode($result) . PHP_EOL);
+                                // 关闭文件句柄并结束子进程
+                                fclose($tempHandle);
+                                \Yii::$app->db->close();
+                                exit(); // 子进程执行完任务后退出
+                            }
                         }
+
                     } catch (\Exception $e) {
                         $ret['msg'] = $e->getMessage();
                     }
@@ -269,10 +271,6 @@ class LogisticCompanySettlementDetailsController extends Controller
                         }
                     }
                 }
-                if ($return['errorCount'] == 0) {
-                    sleep(10);
-                }
-
             } catch (\Exception $e) {
                 echo $e->getMessage() . "\r\n";
             }
@@ -299,7 +297,9 @@ class LogisticCompanySettlementDetailsController extends Controller
                     $processedRes = $this->processData($data);
                 }
                 $endTime = time();
-                echo "time ::" . ($endTime - $startTime) . "\r\n";
+                if (($endTime - $startTime) > 1) {
+                    echo "time ::" . ($endTime - $startTime) . "\r\n";
+                }
                 $result[] = $processedRes;
             }
             return $result;
