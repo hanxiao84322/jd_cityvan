@@ -175,7 +175,7 @@ class DeliveryOrderTaskController extends Controller
                             $errMsg = '第:' . $line . '行插入失败，原因:' . $e->getMessage();
                             echo $errMsg . "\r\n";
                             $return['errorList'][] = $errMsg;
-                            $errData[$line][] = $item;
+                            $errData[$line][] = json_encode($item);
                         }
                     }
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_CHECK_BILL) {
