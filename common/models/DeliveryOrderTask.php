@@ -15,6 +15,7 @@ use Yii;
  * @property int|null $settlement_dimension 结算维度
  * @property int|null $status 执行状态 0 未执行 1 执行中 2 执行完成
  * @property string|null $result 结果
+ * @property string|null $error_data 错误数据
  * @property string|null $apply_username 提交人用户名
  * @property string|null $apply_time 提交时间
  * @property string|null $start_time 执行开始时间
@@ -52,7 +53,7 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
     {
         return [
             [['status', 'type', 'order_type', 'settlement_dimension'], 'integer'],
-            [['file_path', 'result'], 'string'],
+            [['file_path', 'result', 'error_data'], 'string'],
             [['apply_time', 'start_time', 'end_time'], 'safe'],
             [['apply_username'], 'string', 'max' => 50],
         ];
