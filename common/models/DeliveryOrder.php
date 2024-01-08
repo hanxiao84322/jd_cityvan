@@ -398,7 +398,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
 //                } else {
 //                    $logisticId = $logisticCompanyRes['id'];
 //                }
-
+                $receiverAddress = str_replace('"', "", str_replace("'", "", $receiverAddress));
                 $addressSql = "SELECT `name` FROM `cnarea_2020` WHERE '" . $receiverAddress . "' LIKE CONCAT('%', `name`, '%') and level = 2 and (merger_name like \"%四川%\" or merger_name like \"%青海%\" or merger_name like \"%西藏%\" or merger_name like \"%甘肃%\")";
 
                 $addressResult = \Yii::$app->db->createCommand($addressSql)->queryOne();
@@ -503,6 +503,12 @@ class DeliveryOrder extends \yii\db\ActiveRecord
     public static function getJdOrderWeightByOrderNo($orderNo)
     {
         return self::find()->select('GREATEST(MAX(order_weight), MAX(order_weight_rep)) AS max_value')->where(['order_no' => $orderNo])->scalar();
+
+    }
+
+    public static function getMaxJdOrderWeightByOrderNo($orderNo)
+    {
+        return self::find()->select('order_weight, order_weight_rep')->where(['order_no' => $orderNo])->scalar();
 
     }
 
