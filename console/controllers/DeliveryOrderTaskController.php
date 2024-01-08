@@ -176,7 +176,7 @@ class DeliveryOrderTaskController extends Controller
                             echo $errMsg . "\r\n";
                             $return['errorList'][] = $errMsg;
                             $errData[$line] = $item;
-                            $errData[$line][15] = $errMsg;
+                            $errData[$line][] = $errMsg;
                         }
                     }
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_CHECK_BILL) {
