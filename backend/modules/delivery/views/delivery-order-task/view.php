@@ -31,6 +31,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             'result:ntext',
+            [
+                'label' => '错误数据',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    return \common\models\DeliveryOrderTask::getErrorDataHtml($model->error_data);
+                }
+            ],
             'apply_username',
             'apply_time',
             'end_time',

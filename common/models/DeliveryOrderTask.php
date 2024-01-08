@@ -124,4 +124,22 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
         return Utility::truncateString(implode("。", $return), 20);
     }
 
+    public static function getErrorDataHtml($errorData)
+    {
+        $errorDataHtml = "<table><tr><td>快递单号</td><td>日期</td><td>库房号</td><td>订单号</td><td>包裹数量</td><td>包裹号</td><td>订单重量</td><td>订单重量（复重）</td><td>包裹重量</td><td>包裹重量（复重）</td><td>客户姓名</td><td>客户地址</td><td>客户电话</td><td>物流重量</td><td>物流公司</td><td>失败原因</td></tr>";
+        if (!empty($errorData)) {
+            $errorDataArr = json_decode($errorData, true, JSON_UNESCAPED_UNICODE);
+            if (!empty($errorDataArr)) {
+                foreach ($errorDataArr as $item) {
+                    $item = json_decode($item, true, JSON_UNESCAPED_UNICODE);
+                    $errorDataHtml .= "<tr>";
+                    $errorDataHtml .= "<td>" . $item[0] . "</td><td>" . $item[1] . "</td><td>" . $item[2] . "</td><td>" . $item[3] . "</td><td>" . $item[4] . "</td><td>" . $item[5] . "</td><td>" . $item[6] . "</td><td>" . $item[7] . "</td><td>" . $item[8] . "</td><td>" . $item[9] . "</td><td>" . $item[10] . "</td><td>" . $item[11] . "</td><td>" . $item[12] . "</td><td>" . $item[13] . "</td><td>" . $item[14] . "</td><td>" . $item[15] . "</td>";
+                    $errorDataHtml .= "</tr>";
+                }
+            }
+        }
+        $errorDataHtml .= "</table>";
+        return $errorDataHtml;
+    }
+
 }

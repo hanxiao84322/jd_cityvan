@@ -346,6 +346,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
             'successCount' => 0,
             'errorCount' => 0,
             'errorList' => '',
+            'errorData' => [],
         ];
         $errorList = [];
         foreach ($excelData as $line => $item) {
@@ -370,7 +371,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                 $postOfficeWeight = is_float($item[13]) ? $item[13] : (float)$item[13];
                 $logisticCompany = $item[14];
 
-                if (empty($orderNo)) {
+                if (empty($logisticNo)) {
                     continue;
                 }
                 $isUnusual = 0;
@@ -409,7 +410,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                     $province = Cnarea::getParentNameByName($city, Cnarea::LEVEL_TWO);
                     $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
                 }
-                $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo])->exists();
+                $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo])->exists();
                 if (!$deliveryOrderExists) {
                     $deliveryOrderModel = new DeliveryOrder();
                     $deliveryOrderModel->create_name = $username;
@@ -417,7 +418,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                     $deliveryOrderModel->logistic_no = $logisticNo;
                     $deliveryOrderModel->shipping_no = $shippingNo;
                 } else {
-                    $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo]);
+                    $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo]);
                     $deliveryOrderModel->update_name = $username;
                     $deliveryOrderModel->update_time = date('Y-m-d H:i:s', time());
                 }
@@ -448,6 +449,7 @@ class DeliveryOrder extends \yii\db\ActiveRecord
                 $return['errorCount']++;
                 $errorList[] = '第' . $line . '行失败，' . $e->getMessage();
                 $return['errorList'] = $errorList;
+                $return['errorData'][] = json_encode($item);
             }
         }
         return $return;

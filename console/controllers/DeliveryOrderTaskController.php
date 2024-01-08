@@ -35,6 +35,7 @@ class DeliveryOrderTaskController extends Controller
             'msg' => '',
             'return' => []
         ];
+        $errData = [];
         $taskList = DeliveryOrderTask::find()->where(['status' => DeliveryOrderTask::STATUS_WAIT_UPDATE])->asArray()->all();
         if (empty($taskList)) {
             echo "没有待处理的数据。";
@@ -174,7 +175,8 @@ class DeliveryOrderTaskController extends Controller
                             $errMsg = '第:' . $line . '行插入失败，原因:' . $e->getMessage();
                             echo $errMsg . "\r\n";
                             $return['errorList'][] = $errMsg;
-                            $return['errorData'][] = json_encode($item);
+                            $errData[$line] = $item;
+                            $errData[$line][15] = $errMsg;
                         }
                     }
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_CHECK_BILL) {
@@ -272,9 +274,8 @@ class DeliveryOrderTaskController extends Controller
             $taskModel = DeliveryOrderTask::findOne($taskId);
             $taskModel->status = DeliveryOrderTask::STATUS_UPDATED;
             $taskModel->end_time = date('Y-m-d H:i:s', time());
-            $taskModel->error_data = Json::encode($ret['return']['errorData']);
-            unset($ret['return']['errorData']);
             $taskModel->result = Json::encode($ret);
+            $taskModel->error_data = $errData;
             if (!$taskModel->save()) {
                 echo "更新任务数据失败。" . Utility::arrayToString($taskModel->getErrors()) . "\r\n";
             }
