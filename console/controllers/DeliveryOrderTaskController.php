@@ -63,6 +63,7 @@ class DeliveryOrderTaskController extends Controller
                     'successCount' => 0,
                     'errorCount' => 0,
                     'errorList' => [],
+                    'errorData' => [],
                 ];
                 if ($task['type'] == DeliveryOrderTask::TYPE_ORDER) {
                     $excelData = Utility::getExcelDataNew($task['file_path']);
@@ -120,6 +121,7 @@ class DeliveryOrderTaskController extends Controller
 //                } else {
 //                    $logisticId = $logisticCompanyRes['id'];
 //                }
+                            $receiverAddress = str_replace('"', "", str_replace("'", "", $receiverAddress));
 
                             $addressSql = "SELECT `name` FROM `cnarea_2020` WHERE '" . $receiverAddress . "' LIKE CONCAT('%', `name`, '%') and level = 2 and (merger_name like \"%四川%\" or merger_name like \"%青海%\" or merger_name like \"%西藏%\" or merger_name like \"%甘肃%\")";
 
@@ -172,6 +174,7 @@ class DeliveryOrderTaskController extends Controller
                             $errMsg = '第:' . $line . '行插入失败，原因:' . $e->getMessage();
                             echo $errMsg . "\r\n";
                             $return['errorList'][] = $errMsg;
+                            $return['errorData'][] = json_encode($item);
                         }
                     }
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_CHECK_BILL) {
@@ -269,6 +272,7 @@ class DeliveryOrderTaskController extends Controller
             $taskModel->status = DeliveryOrderTask::STATUS_UPDATED;
             $taskModel->end_time = date('Y-m-d H:i:s', time());
             $taskModel->result = Json::encode($ret);
+            $taskModel->error_data = Json::encode($ret['return']['errorData']);
             if (!$taskModel->save()) {
                 echo "更新任务数据失败。" . Utility::arrayToString($taskModel->getErrors()) . "\r\n";
             }
