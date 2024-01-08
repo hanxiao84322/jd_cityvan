@@ -268,11 +268,13 @@ class DeliveryOrderTaskController extends Controller
             }
             \Yii::$app->db->close(); // Close the connection if opened
             \Yii::$app->db->open();  // Reopen the connection
+
             $taskModel = DeliveryOrderTask::findOne($taskId);
             $taskModel->status = DeliveryOrderTask::STATUS_UPDATED;
             $taskModel->end_time = date('Y-m-d H:i:s', time());
-            $taskModel->result = Json::encode($ret);
             $taskModel->error_data = Json::encode($ret['return']['errorData']);
+            unset($ret['return']['errorData']);
+            $taskModel->result = Json::encode($ret);
             if (!$taskModel->save()) {
                 echo "更新任务数据失败。" . Utility::arrayToString($taskModel->getErrors()) . "\r\n";
             }
