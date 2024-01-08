@@ -15,6 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= DetailView::widget([
         'model' => $model,
+        'options' => ['style' => ['width' => '1200px;']],
         'attributes' => [
             'id',
             'file_path',
@@ -30,10 +31,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     return \common\models\DeliveryOrderTask::getStatusName($model->status);
                 }
             ],
-            'result:ntext',
+            [
+                'label' => '执行结果',
+                'format' => 'raw',
+                'contentOptions' => ['style' => ['width' => '1000px']],
+                'value' => function ($model) {
+                    return $model->result;
+                }
+            ],
             [
                 'label' => '错误数据',
                 'format' => 'raw',
+                'contentOptions' => ['style' => ['width' => '1000px']],
                 'value' => function ($model) {
                     return \common\models\DeliveryOrderTask::getErrorDataHtml($model->error_data);
                 }
