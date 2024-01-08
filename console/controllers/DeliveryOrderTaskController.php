@@ -36,6 +36,7 @@ class DeliveryOrderTaskController extends Controller
             'return' => []
         ];
         $errData = [];
+        $orderData = [];
         $taskList = DeliveryOrderTask::find()->where(['status' => DeliveryOrderTask::STATUS_WAIT_UPDATE])->asArray()->all();
         if (empty($taskList)) {
             echo "没有待处理的数据。";
@@ -75,24 +76,24 @@ class DeliveryOrderTaskController extends Controller
                     foreach ($excelData as $line => $item) {
                         try {
                             $address = Utility::changeToArea($item[11]);
-                            $logisticNo = (string)$item[0];
-                            $jdSendTime = $item[1];
-                            $warehouseCode = (string)$item[2];
-                            $orderNo = (string)$item[3];
-                            $shippingNum = intval($item[4]);
-                            $shippingNo = (string)$item[5];
-                            $orderWeight = is_float($item[6]) ? $item[6] : (float)$item[6];
-                            $orderWeightRep = is_float($item[7]) ? $item[7] : (float)$item[7];
-                            $shippingWeight = is_float($item[8]) ? $item[8] : (float)$item[8];
-                            $shippingWeightRep = is_float($item[9]) ? $item[9] : (float)$item[9];
-                            $receiverName = (string)$item[10];
-                            $receiverAddress = (string)$item[11];
+                            $logisticNo = $orderData[$line][] = (string)$item[0];
+                            $jdSendTime = $orderData[$line][] = $item[1];
+                            $warehouseCode = $orderData[$line][] = (string)$item[2];
+                            $orderNo = $orderData[$line][] = (string)$item[3];
+                            $shippingNum = $orderData[$line][] = intval($item[4]);
+                            $shippingNo = $orderData[$line][] = (string)$item[5];
+                            $orderWeight = $orderData[$line][] = is_float($item[6]) ? $item[6] : (float)$item[6];
+                            $orderWeightRep = $orderData[$line][] = is_float($item[7]) ? $item[7] : (float)$item[7];
+                            $shippingWeight = $orderData[$line][] = is_float($item[8]) ? $item[8] : (float)$item[8];
+                            $shippingWeightRep = $orderData[$line][] = is_float($item[9]) ? $item[9] : (float)$item[9];
+                            $receiverName = $orderData[$line][] = (string)$item[10];
+                            $receiverAddress = $orderData[$line][] =  (string)$item[11];
                             $province = trim($address['province']);
                             $city = trim($address['city']);
                             $district = trim($address['district']);
-                            $receiverPhone = (string)$item[12];
-                            $postOfficeWeight = is_float($item[13]) ? $item[13] : (float)$item[13];
-                            $logisticCompany = $item[14];
+                            $receiverPhone = $orderData[$line][] = (string)$item[12];
+                            $postOfficeWeight = $orderData[$line][] = is_float($item[13]) ? $item[13] : (float)$item[13];
+                            $logisticCompany = $orderData[$line][] = $item[14];
 
                             if (empty($orderNo)) {
                                 continue;
@@ -175,7 +176,7 @@ class DeliveryOrderTaskController extends Controller
                             $errMsg = '第:' . $line . '行插入失败，原因:' . $e->getMessage();
                             echo $errMsg . "\r\n";
                             $return['errorList'][] = $errMsg;
-                            $errData[] = $item;
+                            $errData[$line] = $orderData[$line];
                         }
                     }
                 } elseif ($task['type'] == DeliveryOrderTask::TYPE_CHECK_BILL) {
