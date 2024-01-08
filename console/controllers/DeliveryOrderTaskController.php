@@ -275,7 +275,7 @@ class DeliveryOrderTaskController extends Controller
             $taskModel->status = DeliveryOrderTask::STATUS_UPDATED;
             $taskModel->end_time = date('Y-m-d H:i:s', time());
             $taskModel->result = Json::encode($ret);
-            $taskModel->error_data = $errData;
+            $taskModel->error_data = json_encode($errData);
             if (!$taskModel->save()) {
                 echo "更新任务数据失败。" . Utility::arrayToString($taskModel->getErrors()) . "\r\n";
             }
