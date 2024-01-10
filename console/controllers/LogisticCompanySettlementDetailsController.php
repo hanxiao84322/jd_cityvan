@@ -225,7 +225,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                                 $tempHandle = fopen($tempFile, 'w');
                                 // 子进程代码
                                 echo "sub process data count:" . count($chunks[$i]) . "\r\n";
-                                $result = $this->   processChunk($chunks[$i], 'jd'); // 执行任务并将结果存储在对应的索引位置
+                                $result = $this->processChunk($chunks[$i], 'jd'); // 执行任务并将结果存储在对应的索引位置
                                 fwrite($tempHandle, json_encode($result) . PHP_EOL);
                                 // 关闭文件句柄并结束子进程
                                 fclose($tempHandle);
@@ -317,8 +317,8 @@ class LogisticCompanySettlementDetailsController extends Controller
             'errMsg' => ''
         ];
 
+        $transaction = \Yii::$app->db->beginTransaction();
         try {
-
             $itemOrderNo = $deliveryOrder['order_no'];
             $jdOrderWeight = DeliveryOrder::getJdOrderWeightByOrderNo($itemOrderNo);
             $jdWeight = DeliveryOrder::getJdWeightByOrderNo($itemOrderNo);
@@ -451,9 +451,11 @@ class LogisticCompanySettlementDetailsController extends Controller
             } else {
                 DeliveryOrder::updateAll(['total_price' => $fee, 'split_total_price' => $splitAmount], ['logistic_no' => $itemLogisticNo]); //更新订单京东收取费用
             }
+            $transaction->commit();
             $return['status'] = 1;
         } catch (\Exception $e) {
             $return['errMsg'] = $e->getMessage();
+            $transaction->rollBack();
         }
         return $return;
     }

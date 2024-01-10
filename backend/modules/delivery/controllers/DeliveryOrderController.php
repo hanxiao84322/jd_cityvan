@@ -243,6 +243,27 @@ class DeliveryOrderController extends Controller
         $return = DeliveryOrder::batchUpdate($excelData, \Yii::$app->user->getIdentity()['username']);
         $return['status'] = 1;
         $return['errorList'] = Utility::arrayToString($return['errorList']);
+        if (!empty($return['errorData'])) {
+            $fileName = '订单导入失败数据-' . date('YmdHi');
+            $header = [
+                '快递单号',
+                '日期',
+                '库房号',
+                '订单号',
+                '包裹数量',
+                '包裹号',
+                '订单重量',
+                '订单重量（复重）',
+                '包裹重量',
+                '包裹重量（复重）',
+                '客户姓名',
+                '客户地址',
+                '客户电话',
+                '物流重量',
+                '物流公司'
+            ];
+            Utility::exportData($return['errorData'], $header, $fileName, $fileName);
+        }
 
         echo Json::encode($return);
         exit;

@@ -496,21 +496,9 @@ class DeliveryOrder extends \yii\db\ActiveRecord
         return self::find()->select('post_office_weight')->where(['logistic_no' => $logisticNo])->scalar();
     }
 
-    public static function getCdJdWeightByOrderNo($orderNo)
-    {
-        return self::find()->select('count(*) as shipping_num, sum(shipping_weight_rep) as total_jd_weight')->where(['order_no' => $orderNo])->column();
-
-    }
-
     public static function getJdOrderWeightByOrderNo($orderNo)
     {
         return self::find()->select('GREATEST(MAX(order_weight), MAX(order_weight_rep)) AS max_value')->where(['order_no' => $orderNo])->scalar();
-
-    }
-
-    public static function getMaxJdOrderWeightByOrderNo($orderNo)
-    {
-        return self::find()->select('order_weight, order_weight_rep')->where(['order_no' => $orderNo])->scalar();
 
     }
 
