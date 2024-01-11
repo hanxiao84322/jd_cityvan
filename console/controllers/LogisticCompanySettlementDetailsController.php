@@ -298,7 +298,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                 }
                 $endTime = time();
                 if (($endTime - $startTime) > 1) {
-                    echo "time ::" . ($endTime - $startTime) . "\r\n";
+                    echo "order_no :: " . $data['order_no'] . "-logistic_no:: " . $data['logistic_no'] . "-time ::" . ($endTime - $startTime) . "\r\n";
                 }
                 $result[] = $processedRes;
             }

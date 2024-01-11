@@ -102,9 +102,12 @@ class DeliveryOrderTaskController extends Controller
                             if (strlen($receiverName) > 40) {
                                 $isUnusual = 1;
                             }
+                            if (!str_contains($shippingNo, $orderNo)) {
+                                throw new \Exception('订单号格式不正确');
+                            }
                             $logisticCompanyRes = LogisticCompany::find()->where(['company_name' => $logisticCompany])->asArray()->one();
                             if (empty($logisticCompanyRes)) {
-                                throw new \Exception('不存在的物流名称:' . $logisticCompany);
+                                throw new \Exception('不存在的快递公司名称:' . $logisticCompany);
                             }
                             $logisticId = $logisticCompanyRes['id'];
 
@@ -135,7 +138,7 @@ class DeliveryOrderTaskController extends Controller
                                 $province = Cnarea::getParentNameByName($city, Cnarea::LEVEL_TWO);
                                 $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
                             }
-                            $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo])->exists();
+                            $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo])->exists();
                             if (!$deliveryOrderExists) {
                                 $deliveryOrderModel = new DeliveryOrder();
                                 $deliveryOrderModel->create_name = 'system';
@@ -143,7 +146,7 @@ class DeliveryOrderTaskController extends Controller
                                 $deliveryOrderModel->logistic_no = $logisticNo;
                                 $deliveryOrderModel->shipping_no = $shippingNo;
                             } else {
-                                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo]);
+                                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo]);
                                 $deliveryOrderModel->update_name = 'system';
                                 $deliveryOrderModel->update_time = date('Y-m-d H:i:s', time());
                             }
@@ -667,7 +670,7 @@ class DeliveryOrderTaskController extends Controller
                         $province = Cnarea::getParentNameByName($city, Cnarea::LEVEL_TWO);
                         $timeliness = LogisticCompanyTimeliness::getTimelinessByDeliveryOrderInfo($warehouseCode, $logisticId, $province, $city, $district);
                     }
-                    $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo])->exists();
+                    $deliveryOrderExists = DeliveryOrder::find()->where(['logistic_no' => $logisticNo])->exists();
                     if (!$deliveryOrderExists) {
                         $deliveryOrderModel = new DeliveryOrder();
                         $deliveryOrderModel->create_name = 'system';
@@ -675,7 +678,7 @@ class DeliveryOrderTaskController extends Controller
                         $deliveryOrderModel->logistic_no = $logisticNo;
                         $deliveryOrderModel->shipping_no = $shippingNo;
                     } else {
-                        $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo, 'shipping_no' => $shippingNo]);
+                        $deliveryOrderModel = DeliveryOrder::findOne(['logistic_no' => $logisticNo]);
                         $deliveryOrderModel->update_name = 'system';
                         $deliveryOrderModel->update_time = date('Y-m-d H:i:s', time());
                     }
@@ -822,7 +825,7 @@ class DeliveryOrderTaskController extends Controller
         }
     }
 
-    private function processData($item, $tempOrderNo,$orderType, $settlementDimension)
+    private function processData($item, $tempOrderNo,$orderType, $settlementDimension): array
     {
         $return = [
             'status' => 0,
@@ -850,9 +853,9 @@ class DeliveryOrderTaskController extends Controller
             //                }
             $status = LogisticCompanyCheckBillDetail::STATUS_SAME;
             if ($settlementDimension == LogisticCompanyCheckBill::SETTLEMENT_DIMENSION_LOGISTIC_NO) {
-                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode, 'logistic_no' => $logisticNo]);
+                $deliveryOrderModel = DeliveryOrder::findOne(['warehouse_code' => $warehouseCode, 'logistic_no' => $logisticNo]);
             } else {
-                $deliveryOrderModel = DeliveryOrder::findOne(['logistic_id' => $logisticId, 'warehouse_code' => $warehouseCode, 'order_no' => $logisticNo]);
+                $deliveryOrderModel = DeliveryOrder::findOne(['warehouse_code' => $warehouseCode, 'order_no' => $logisticNo]);
             }
             if (empty($deliveryOrderModel)) {
                 $status = LogisticCompanyCheckBillDetail::STATUS_NOT_FOUND;
