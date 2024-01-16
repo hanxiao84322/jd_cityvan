@@ -196,6 +196,7 @@ class DeliveryOrderTaskController extends Controller
                         }
                         $chunks = array_chunk($excelData, ceil(count($excelData) / $processes)); // 将大数组拆分成多个小数组
                         $tempFiles = []; // 用于存储临时文件名的数组
+                        echo "processes:" . $processes . "\r\n";
                         // 创建指定数量的子进程
                         for ($i = 0; $i < $processes; $i++) {
                             try {
