@@ -211,6 +211,7 @@ class DeliveryOrderTaskController extends Controller
                                         // 打开临时文件用于写入
                                         $tempHandle = fopen($tempFile, 'w');
                                     // 子进程代码
+                                    echo "sub process data count:" . count($chunks[$i]) . "\r\n";
                                     $result = $this->processChunk($chunks[$i], $tempOrderNo, $orderType, $settlementDimension); // 执行任务并将结果存储在对应的索引位置
                                     fwrite($tempHandle, json_encode($result) . PHP_EOL);
                                     // 关闭文件句柄并结束子进程
@@ -813,9 +814,14 @@ class DeliveryOrderTaskController extends Controller
         try {
             // 执行任务
             foreach ($chunk as $data) {
+                $startTime = time();
                 // 处理数据
                 $processedRes = $this->processData($data, $tempOrderNo,$orderType, $settlementDimension);
                 $result[] = $processedRes;
+                $endTime = time();
+                if (($endTime - $startTime) > 1) {
+                        echo "logistic_no:: " . $data['logistic_no'] . "-time ::" . ($endTime - $startTime) . "\r\n";
+                }
             }
             return $result;
         } catch (ExitException $e) {
