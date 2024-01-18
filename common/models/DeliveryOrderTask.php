@@ -111,7 +111,7 @@ class DeliveryOrderTask extends \yii\db\ActiveRecord
                 $return['success'] = '成功';
             }
             if (!empty($res['return'])) {
-                $return['res'] = '成功条数：' . $res['return']['successCount'] . ',失败条数：' . $res['return']['errorCount'];
+                $return['res'] = '成功条数：' . (empty($res['return']['successCount']) ? 0 : $res['return']['successCount']) . ',失败条数：' . (empty($res['return']['errorCount']) ? 0 : $res['return']['errorCount']);
             }
             if (!empty($res['return']['errorList'])) {
                 if (is_array($res['return']['errorList'])) {

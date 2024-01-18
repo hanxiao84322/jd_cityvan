@@ -138,20 +138,22 @@ class LogisticCompanySettlementDetailsController extends Controller
                 echo $e->getMessage() . "\r\n";
             }
         }
+        print_r($return);
+        echo "finish";
     }
 
     /**
      * ./yii logistic-company-settlement-details/jd-run '' '' '' '' '' ''
      *
-     * @param $logisticNo
-     * @param $orderNo
-     * @param $warehouseCode
-     * @param $province
-     * @param $startTime
-     * @param $processes
-     * @param $endTime
+     * @param string $logisticNo
+     * @param string $orderNo
+     * @param string $warehouseCode
+     * @param string $province
+     * @param string $startTime
+     * @param int $processes
+     * @param string $endTime
      */
-    public function actionJdRun($processes = 5, $startTime = '', $endTime = '', $warehouseCode = '', $province = '', $logisticNo = '', $orderNo = '')
+    public function actionJdRun(int $processes = 5, string $startTime = '', string $endTime = '', string $warehouseCode = '', string $province = '', string $logisticNo = '', string $orderNo = ''): void
     {
         $sql = "SELECT warehouse_code, province FROM " . LogisticCompanyFeeRules::tableName() . " WHERE  type = " . LogisticCompanyFeeRules::TYPE_WAREHOUSE . "  ";
         if (!empty($warehouseCode)) {
@@ -235,7 +237,7 @@ class LogisticCompanySettlementDetailsController extends Controller
                         }
 
                     } catch (\Exception $e) {
-                        $ret['msg'] = $e->getMessage();
+                        echo $e->getMessage() . "\r\n";
                     }
                 }
                 // 等待子进程完成，并获取结果
